@@ -1183,7 +1183,7 @@ onMounted(async () => {
         <div class="login-copy">
           <div class="poster-shell">
             <div class="brand-stage poster-stage">
-              <img class="brand-logo brand-logo-login" src="/hotel-logo.png" alt="Hotel Logo" />
+              <img class="brand-logo brand-logo-login" src="/favicon.svg" alt="Hotel Logo" />
               <div class="brand-copy">
                 <h1 class="login-title">轻量酒店工作台</h1>
               </div>
@@ -1284,7 +1284,7 @@ onMounted(async () => {
       <header class="hero">
         <div class="hero-head">
           <div class="brand-lockup">
-            <img class="brand-logo brand-logo-header" src="/hotel-logo.png" alt="Hotel Logo" />
+            <img class="brand-logo brand-logo-header" src="/favicon.svg" alt="Hotel Logo" />
             <div class="hero-copy compact-copy">
               <p class="eyebrow">Guest Portal</p>
               <h1>住客中心</h1>
@@ -1518,7 +1518,7 @@ onMounted(async () => {
       <header class="hero">
         <div class="hero-head">
           <div class="brand-lockup">
-            <img class="brand-logo brand-logo-header" src="/hotel-logo.png" alt="Hotel Logo" />
+            <img class="brand-logo brand-logo-header" src="/favicon.svg" alt="Hotel Logo" />
             <div class="hero-copy compact-copy">
               <p class="eyebrow">Hotel Management System</p>
               <h1>日常工作台</h1>
