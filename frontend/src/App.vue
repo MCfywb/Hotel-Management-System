@@ -98,8 +98,8 @@ const defaultUserForm = () => ({
 })
 
 const loginForm = ref({
-  username: 'admin',
-  password: 'admin123',
+  username: '',
+  password: '',
 })
 
 const registerForm = ref(defaultRegisterForm())
@@ -1185,7 +1185,7 @@ onMounted(async () => {
             <div class="brand-stage poster-stage">
               <img class="brand-logo brand-logo-login" src="/favicon.svg" alt="Hotel Logo" />
               <div class="brand-copy">
-                <h1 class="login-title">轻量酒店工作台</h1>
+                <h1 class="login-title">酒店工作台</h1>
               </div>
             </div>
 
