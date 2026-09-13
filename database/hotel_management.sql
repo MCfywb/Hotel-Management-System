@@ -137,9 +137,9 @@ CREATE TABLE notification_message (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO room_type (name, base_price, max_guests, bed_type, area, description, amenities) VALUES
-('Urban Queen', 498.00, 2, '1.8m Queen Bed', 32, 'Suitable for business trips and city short stays.', 'Breakfast, WiFi, Smart TV'),
-('Garden Twin', 568.00, 2, '2 x 1.2m Twin Bed', 36, 'Quiet floor with courtyard-facing windows.', 'Breakfast, WiFi, Tea Set'),
-('Executive Suite', 968.00, 4, '1.8m Queen Bed + Sofa', 62, 'Living room layout for family or VIP guests.', 'Breakfast, Mini Bar, Bathtub');
+('都市大床房', 498.00, 2, '1.8 米大床', 32, '适合商旅出行与城市短住。', '早餐, 无线网络, 智能电视'),
+('花园双床房', 568.00, 2, '2 张 1.2 米单人床', 36, '安静楼层，窗户朝向庭院。', '早餐, 无线网络, 茶具'),
+('行政套房', 968.00, 4, '1.8 米大床 + 沙发', 62, '客厅式布局，适合家庭或贵宾入住。', '早餐, 迷你吧, 浴缸');
 
 INSERT INTO room (room_number, room_type_id, floor, status, clean_status) VALUES
 ('801', 1, 8, 'AVAILABLE', 'READY'),
@@ -150,9 +150,9 @@ INSERT INTO room (room_number, room_type_id, floor, status, clean_status) VALUES
 ('1002', 3, 10, 'MAINTENANCE', 'BLOCKED');
 
 INSERT INTO guest (full_name, phone, id_card, member_level, remark) VALUES
-('林若川', '13800000001', '330102199110101234', 'GOLD', 'Late check-in'),
-('周清禾', '13800000002', '330102199305052456', 'REGULAR', 'Corporate booking'),
-('沈嘉屿', '13800000003', '330102199512128888', 'PLATINUM', 'Needs airport pickup');
+('林若川', '13800000001', '330102199110101234', 'GOLD', '习惯晚到，请保留房间'),
+('周清禾', '13800000002', '330102199305052456', 'REGULAR', '企业协议客户，按月结算'),
+('沈嘉屿', '13800000003', '330102199512128888', 'PLATINUM', '需要机场接送服务');
 
 INSERT INTO customer_user (username, phone, password, display_name, member_level, status) VALUES
 ('13900000001', '13900000001', '$2a$10$VvN31onlQ0j5W1D2Laj0zuzQO2S4M0nB6fTP3D6JrIoYNewc0hXtS', '住客示例', 'REGULAR', 'ACTIVE');
@@ -162,6 +162,39 @@ INSERT INTO reservation (
     room_fee, breakfast_fee, extra_bed_fee, deposit_amount, coupon_amount, total_amount,
     status, channel, special_request, created_at
 ) VALUES
-('RES20260422080001', 1, 2, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 2 DAY), 2, 996.00, 68.00, 0.00, 300.00, 50.00, 1314.00, 'BOOKED', 'DIRECT', 'Window side preferred', NOW()),
-('RES20260421093015', 2, 4, DATE_SUB(CURDATE(), INTERVAL 1 DAY), DATE_ADD(CURDATE(), INTERVAL 1 DAY), 2, 1136.00, 88.00, 0.00, 300.00, 0.00, 1524.00, 'CHECKED_IN', 'OTA', 'Need extra towel', NOW()),
-('RES20260420114530', 3, 5, DATE_ADD(CURDATE(), INTERVAL 3 DAY), DATE_ADD(CURDATE(), INTERVAL 5 DAY), 3, 1936.00, 128.00, 160.00, 500.00, 100.00, 2624.00, 'BOOKED', 'DIRECT', 'Family crib', NOW());
+('RES20260422080001', 1, 2, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 2 DAY), 2, 996.00, 68.00, 0.00, 300.00, 50.00, 1314.00, 'BOOKED', 'DIRECT', '偏好靠窗房间', NOW()),
+('RES20260421093015', 2, 4, DATE_SUB(CURDATE(), INTERVAL 1 DAY), DATE_ADD(CURDATE(), INTERVAL 1 DAY), 2, 1136.00, 88.00, 0.00, 300.00, 0.00, 1524.00, 'CHECKED_IN', 'OTA', '需要额外毛巾', NOW()),
+('RES20260420114530', 3, 5, DATE_ADD(CURDATE(), INTERVAL 3 DAY), DATE_ADD(CURDATE(), INTERVAL 5 DAY), 3, 1936.00, 128.00, 160.00, 500.00, 100.00, 2624.00, 'BOOKED', 'DIRECT', '需要婴儿床', NOW());
+
+-- 历史已退房订单：让住客画像的「完成入住 / 累计消费 / 平均消费」有真实数据
+INSERT INTO reservation (
+    reservation_no, guest_id, room_id, check_in_date, check_out_date, guest_count,
+    room_fee, breakfast_fee, extra_bed_fee, deposit_amount, coupon_amount, total_amount,
+    status, channel, special_request, created_at, actual_check_in_time, actual_check_out_time
+) VALUES
+('RES20260312080001', 1, 1, DATE_SUB(CURDATE(), INTERVAL 60 DAY), DATE_SUB(CURDATE(), INTERVAL 58 DAY), 2,
+ 996.00, 68.00, 0.00, 300.00, 0.00, 1364.00, 'CHECKED_OUT', 'DIRECT', '希望安排高楼层安静房间',
+ DATE_SUB(NOW(), INTERVAL 62 DAY), DATE_SUB(NOW(), INTERVAL 60 DAY), DATE_SUB(NOW(), INTERVAL 58 DAY)),
+('RES20260405093002', 1, 3, DATE_SUB(CURDATE(), INTERVAL 25 DAY), DATE_SUB(CURDATE(), INTERVAL 23 DAY), 2,
+ 1136.00, 88.00, 0.00, 300.00, 50.00, 1474.00, 'CHECKED_OUT', 'OTA', '需要开具增值税发票',
+ DATE_SUB(NOW(), INTERVAL 27 DAY), DATE_SUB(NOW(), INTERVAL 25 DAY), DATE_SUB(NOW(), INTERVAL 23 DAY)),
+('RES20260402101503', 2, 1, DATE_SUB(CURDATE(), INTERVAL 30 DAY), DATE_SUB(CURDATE(), INTERVAL 29 DAY), 2,
+ 498.00, 68.00, 0.00, 300.00, 0.00, 866.00, 'CHECKED_OUT', 'PHONE', '企业协议价，按月度结算',
+ DATE_SUB(NOW(), INTERVAL 31 DAY), DATE_SUB(NOW(), INTERVAL 30 DAY), DATE_SUB(NOW(), INTERVAL 29 DAY)),
+('RES20260415113004', 2, 3, DATE_SUB(CURDATE(), INTERVAL 15 DAY), DATE_SUB(CURDATE(), INTERVAL 13 DAY), 2,
+ 1136.00, 88.00, 0.00, 300.00, 0.00, 1524.00, 'CHECKED_OUT', 'DIRECT', '希望延迟退房至 14:00',
+ DATE_SUB(NOW(), INTERVAL 16 DAY), DATE_SUB(NOW(), INTERVAL 15 DAY), DATE_SUB(NOW(), INTERVAL 13 DAY)),
+('RES20260320093005', 3, 5, DATE_SUB(CURDATE(), INTERVAL 45 DAY), DATE_SUB(CURDATE(), INTERVAL 42 DAY), 3,
+ 2904.00, 128.00, 160.00, 500.00, 100.00, 3592.00, 'CHECKED_OUT', 'DIRECT', '需要婴儿床与接送机服务',
+ DATE_SUB(NOW(), INTERVAL 46 DAY), DATE_SUB(NOW(), INTERVAL 45 DAY), DATE_SUB(NOW(), INTERVAL 42 DAY)),
+('RES20260410144506', 3, 5, DATE_SUB(CURDATE(), INTERVAL 20 DAY), DATE_SUB(CURDATE(), INTERVAL 18 DAY), 3,
+ 1936.00, 128.00, 0.00, 500.00, 0.00, 2564.00, 'CHECKED_OUT', 'OTA', '家庭同行，需加床',
+ DATE_SUB(NOW(), INTERVAL 21 DAY), DATE_SUB(NOW(), INTERVAL 20 DAY), DATE_SUB(NOW(), INTERVAL 18 DAY));
+
+-- 退房结算流水：与上面的历史订单对应，保证「财务流水 / 流水概览」统计一致
+INSERT INTO financial_transaction (
+    reservation_id, reservation_no, transaction_type, amount, direction, remark, created_at
+)
+SELECT r.id, r.reservation_no, 'CHECKOUT_SETTLEMENT', r.total_amount, 'CHARGE', '历史订单退房结算', r.actual_check_out_time
+FROM reservation r
+WHERE r.status = 'CHECKED_OUT';
