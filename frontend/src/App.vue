@@ -33,7 +33,7 @@ const defaultRoomTypeForm = () => ({
   name: '',
   basePrice: 498,
   maxGuests: 2,
-  bedType: '1.8m Queen Bed',
+  bedType: '1.8 米大床',
   area: 32,
   description: '',
   amenities: '',
@@ -315,6 +315,20 @@ const statusText = (status) =>
     DISABLED: '停用',
   }[status] || status || '—')
 
+const memberLevelText = (level) =>
+  ({
+    REGULAR: '普通会员',
+    GOLD: '黄金会员',
+    PLATINUM: '白金会员',
+  }[level] || level || '—')
+
+const documentTypeText = (type) =>
+  ({
+    RESERVATION: '预订单',
+    CHECK_IN: '入住单',
+    CHECKOUT_SETTLEMENT: '退房结算单',
+  }[type] || type || '单据')
+
 const channelText = (channel) =>
   ({
     DIRECT: '前台直订',
@@ -384,7 +398,7 @@ function snapshotText(snapshot) {
   const items = [
     parts.reservationNo && `订单 ${parts.reservationNo}`,
     parts.status && `状态 ${statusText(parts.status)}`,
-    parts.roomId && `房间ID ${parts.roomId}`,
+    parts.roomId && `房间编号 ${parts.roomId}`,
     parts.checkIn && `入住 ${parts.checkIn}`,
     parts.checkOut && `离店 ${parts.checkOut}`,
     parts.total && `金额 ${currency(parts.total)}`,
@@ -974,7 +988,7 @@ async function changeReservationStatus(item, status) {
       method: 'PUT',
       body: JSON.stringify({ status }),
     })
-    successMessage.value = `订单状态已更新为 ${status}`
+    successMessage.value = `订单状态已更新为 ${statusText(status)}`
     await Promise.all([
       loadDashboard(),
       loadReservationPage(reservationPage.value.pageNo),
@@ -1070,7 +1084,7 @@ async function exportExcel() {
     link.download = `hotel-operations-${dateString(new Date())}.xlsx`
     link.click()
     URL.revokeObjectURL(url)
-    successMessage.value = 'Excel 报表已导出'
+    successMessage.value = '报表已导出'
   } catch (error) {
     errorMessage.value = error.message
   } finally {
@@ -1093,7 +1107,7 @@ async function openPrintDocument(item, type) {
     popup.document.write(`
       <html>
         <head>
-          <title>${data.documentType}</title>
+          <title>${documentTypeText(data.documentType)}</title>
           <style>
             body{font-family:Arial,sans-serif;padding:32px;color:#1d1a16}
             h1{font-size:28px;margin:0 0 20px}
@@ -1104,7 +1118,7 @@ async function openPrintDocument(item, type) {
           </style>
         </head>
         <body>
-          <h1>${data.documentType}</h1>
+          <h1>${documentTypeText(data.documentType)}</h1>
           <div class="grid">
             <div class="card">订单号：${data.reservationNo}</div>
             <div class="card">住客：${data.guestName}</div>
@@ -1137,7 +1151,7 @@ async function openPrintDocument(item, type) {
 
 function roomTypeName(roomTypeId) {
   const source = isCustomer.value ? customerRoomTypes.value : roomTypeList.value
-  return source.find((item) => item.id === roomTypeId)?.name || 'Unknown'
+  return source.find((item) => item.id === roomTypeId)?.name || '未知房型'
 }
 
 function goPage(loader, pagerRef, nextPage) {
@@ -1183,7 +1197,7 @@ onMounted(async () => {
         <div class="login-copy">
           <div class="poster-shell">
             <div class="brand-stage poster-stage">
-              <img class="brand-logo brand-logo-login" src="/favicon.svg" alt="Hotel Logo" />
+              <img class="brand-logo brand-logo-login" src="/favicon.svg" alt="酒店标识" />
               <div class="brand-copy">
                 <h1 class="login-title">酒店工作台</h1>
               </div>
@@ -1206,7 +1220,7 @@ onMounted(async () => {
             <form v-if="authMode === 'login'" class="auth-form" @submit.prevent="login">
               <div class="section-head compact">
                 <div>
-                  <p class="section-label">{{ authAudience === 'customer' ? 'Guest Sign In' : 'Sign In' }}</p>
+                  <p class="section-label">{{ authAudience === 'customer' ? '住客登录' : '账号登录' }}</p>
                   <h2>{{ authAudience === 'customer' ? '进入住客中心' : '进入工作台' }}</h2>
                 </div>
               </div>
@@ -1225,7 +1239,7 @@ onMounted(async () => {
             <form v-else class="auth-form" @submit.prevent="register">
               <div class="section-head compact">
                 <div>
-                  <p class="section-label">{{ authAudience === 'customer' ? 'Guest Register' : 'Register' }}</p>
+                  <p class="section-label">{{ authAudience === 'customer' ? '住客注册' : '账号注册' }}</p>
                   <h2>{{ authAudience === 'customer' ? '注册住客账号' : '注册账号' }}</h2>
                 </div>
               </div>
@@ -1260,11 +1274,11 @@ onMounted(async () => {
       <header class="hero">
         <div class="hero-head">
           <div class="brand-lockup">
-            <img class="brand-logo brand-logo-header" src="/favicon.svg" alt="Hotel Logo" />
+            <img class="brand-logo brand-logo-header" src="/favicon.svg" alt="酒店标识" />
             <div class="hero-copy compact-copy">
-              <p class="eyebrow">Guest Portal</p>
+              <p class="eyebrow">住客门户</p>
               <h1>住客中心</h1>
-              <p class="copy-text">欢迎回来，{{ customerProfile?.displayName || currentUser?.displayName }} · 会员等级 {{ customerProfile?.memberLevel || 'REGULAR' }}</p>
+              <p class="copy-text">欢迎回来，{{ customerProfile?.displayName || currentUser?.displayName }} · 会员等级 {{ memberLevelText(customerProfile?.memberLevel || 'REGULAR') }}</p>
             </div>
           </div>
 
@@ -1285,7 +1299,7 @@ onMounted(async () => {
 
       <section v-if="successMessage || errorMessage" class="status-strip">
         <span :class="['pill', errorMessage ? 'pill-red' : 'pill-green']">
-          {{ errorMessage ? 'Operation Failed' : 'Operation Success' }}
+          {{ errorMessage ? '操作失败' : '操作成功' }}
         </span>
         <p>{{ errorMessage || successMessage }}</p>
       </section>
@@ -1295,7 +1309,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Rooms</p>
+                <p class="section-label">房型浏览</p>
                 <h2>可订房型</h2>
               </div>
               <p class="section-note">浏览房型与基础价格</p>
@@ -1314,7 +1328,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Member</p>
+                <p class="section-label">会员信息</p>
                 <h2>住客账户</h2>
               </div>
             </div>
@@ -1324,7 +1338,7 @@ onMounted(async () => {
                   <p class="list-title">当前账户</p>
                   <p class="list-subtitle">{{ customerProfile?.displayName || currentUser?.displayName }}</p>
                 </div>
-                <strong>{{ customerProfile?.memberLevel || 'REGULAR' }}</strong>
+                <strong>{{ memberLevelText(customerProfile?.memberLevel || 'REGULAR') }}</strong>
               </article>
               <article class="summary-row">
                 <div>
@@ -1348,7 +1362,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Create Booking</p>
+                <p class="section-label">预订填写</p>
                 <h2>在线预订</h2>
               </div>
             </div>
@@ -1382,7 +1396,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Booking Tips</p>
+                <p class="section-label">预订须知</p>
                 <h2>预订说明</h2>
               </div>
             </div>
@@ -1413,8 +1427,8 @@ onMounted(async () => {
         <section v-if="customerTab === 'reservations'" class="panel">
           <div class="section-head">
             <div>
-              <p class="section-label">My Reservations</p>
-              <h2>我的订单</h2>
+                <p class="section-label">订单查询</p>
+                <h2>我的订单</h2>
             </div>
           </div>
           <div class="table-list">
@@ -1440,7 +1454,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Profile</p>
+                <p class="section-label">资料概览</p>
                 <h2>账户资料</h2>
               </div>
             </div>
@@ -1461,7 +1475,7 @@ onMounted(async () => {
                 <div>
                   <p class="list-title">会员等级</p>
                 </div>
-                <strong>{{ customerProfile?.memberLevel || 'REGULAR' }}</strong>
+                <strong>{{ memberLevelText(customerProfile?.memberLevel || 'REGULAR') }}</strong>
               </article>
             </div>
           </section>
@@ -1469,7 +1483,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Security</p>
+                <p class="section-label">安全设置</p>
                 <h2>修改密码</h2>
               </div>
             </div>
@@ -1494,9 +1508,9 @@ onMounted(async () => {
       <header class="hero">
         <div class="hero-head">
           <div class="brand-lockup">
-            <img class="brand-logo brand-logo-header" src="/favicon.svg" alt="Hotel Logo" />
+            <img class="brand-logo brand-logo-header" src="/favicon.svg" alt="酒店标识" />
             <div class="hero-copy compact-copy">
-              <p class="eyebrow">Hotel Management System</p>
+              <p class="eyebrow">酒店管理系统</p>
               <h1>日常工作台</h1>
               <p class="copy-text">当前登录：{{ currentUser?.displayName }} · {{ roleLabel }} · 账号 {{ currentUser?.username }}</p>
             </div>
@@ -1504,7 +1518,7 @@ onMounted(async () => {
 
           <div class="toolbar-actions hero-actions">
             <button class="secondary-button" @click="loadAllData">刷新数据</button>
-            <button class="secondary-button" @click="exportExcel">导出 Excel</button>
+            <button class="secondary-button" @click="exportExcel">导出报表</button>
             <button class="secondary-button" @click="logout">退出登录</button>
           </div>
         </div>
@@ -1521,7 +1535,7 @@ onMounted(async () => {
 
       <section v-if="successMessage || errorMessage" class="status-strip">
         <span :class="['pill', errorMessage ? 'pill-red' : 'pill-green']">
-          {{ errorMessage ? 'Operation Failed' : 'Operation Success' }}
+          {{ errorMessage ? '操作失败' : '操作成功' }}
         </span>
         <p>{{ errorMessage || successMessage }}</p>
       </section>
@@ -1532,8 +1546,8 @@ onMounted(async () => {
             <section class="panel">
               <div class="section-head">
                 <div>
-                  <p class="section-label">Overview</p>
-                  <h2>运营总览</h2>
+                <p class="section-label">核心指标</p>
+                <h2>运营总览</h2>
                 </div>
                 <p class="section-note">房态、订单与收入核心指标</p>
               </div>
@@ -1551,8 +1565,8 @@ onMounted(async () => {
             <section class="panel">
               <div class="section-head">
                 <div>
-                  <p class="section-label">Trend</p>
-                  <h2>近 7 日营收趋势</h2>
+                <p class="section-label">营收趋势</p>
+                <h2>近 7 日营收趋势</h2>
                 </div>
               </div>
               <div class="trend-strip">
@@ -1594,8 +1608,8 @@ onMounted(async () => {
             <section class="panel">
               <div class="section-head">
                 <div>
-                  <p class="section-label">Daily Focus</p>
-                  <h2>日常处理建议</h2>
+                <p class="section-label">今日重点</p>
+                <h2>日常处理建议</h2>
                 </div>
               </div>
               <div class="table-list">
@@ -1623,8 +1637,8 @@ onMounted(async () => {
             <section class="panel">
               <div class="section-head">
                 <div>
-                  <p class="section-label">Message Focus</p>
-                  <h2>未读提醒</h2>
+                <p class="section-label">提醒概览</p>
+                <h2>未读提醒</h2>
                 </div>
                 <button class="secondary-button small" @click="activeTab = 'messages'">查看全部</button>
               </div>
@@ -1634,7 +1648,7 @@ onMounted(async () => {
                     <p class="list-title">{{ item.title }}</p>
                     <p class="list-subtitle">{{ item.content }}</p>
                   </div>
-                  <span class="pill pill-yellow">{{ item.category }}</span>
+                  <span class="pill pill-yellow">{{ notificationCategoryText(item.category) }}</span>
                 </article>
               </div>
               <p v-else class="empty-note">暂无未读提醒，前台节奏很稳。</p>
@@ -1645,8 +1659,8 @@ onMounted(async () => {
             <section class="panel">
               <div class="section-head">
                 <div>
-                  <p class="section-label">Finance Brief</p>
-                  <h2>流水概览</h2>
+                <p class="section-label">财务概览</p>
+                <h2>流水概览</h2>
                 </div>
                 <button class="secondary-button small" @click="activeTab = 'finance'">查看流水</button>
               </div>
@@ -1662,18 +1676,18 @@ onMounted(async () => {
             <section class="panel">
               <div class="section-head">
                 <div>
-                  <p class="section-label">Account Security</p>
-                  <h2>修改密码</h2>
-                </div>
+                <p class="section-label">密码安全</p>
+                <h2>修改密码</h2>
               </div>
-              <form class="editor-form single-column" @submit.prevent="changePassword">
-                <label>当前密码<input v-model="passwordForm.oldPassword" type="password" autocomplete="current-password" /></label>
-                <label>新密码<input v-model="passwordForm.newPassword" type="password" autocomplete="new-password" /></label>
-                <label>确认新密码<input v-model="passwordForm.confirmPassword" type="password" autocomplete="new-password" /></label>
-                <div class="form-actions">
-                  <button class="primary-button" type="submit">{{ actionLoading ? '提交中...' : '更新密码' }}</button>
-                </div>
-              </form>
+            </div>
+            <form class="editor-form single-column" @submit.prevent="changePassword">
+              <label>当前密码<input v-model="passwordForm.oldPassword" type="password" autocomplete="current-password" /></label>
+              <label>新密码<input v-model="passwordForm.newPassword" type="password" autocomplete="new-password" /></label>
+              <label>确认新密码<input v-model="passwordForm.confirmPassword" type="password" autocomplete="new-password" /></label>
+              <div class="form-actions">
+                <button class="primary-button" type="submit">{{ actionLoading ? '提交中...' : '更新密码' }}</button>
+              </div>
+            </form>
             </section>
           </section>
         </section>
@@ -1681,8 +1695,8 @@ onMounted(async () => {
         <section v-if="activeTab === 'calendar'" class="panel">
           <div class="section-head">
             <div>
-              <p class="section-label">Room Calendar</p>
-              <h2>房态日历</h2>
+                <p class="section-label">房态总览</p>
+                <h2>房态日历</h2>
             </div>
             <p class="section-note">按日期查看每个房间的预订、入住与空房状态</p>
           </div>
@@ -1717,7 +1731,7 @@ onMounted(async () => {
             >
               <div class="calendar-room-meta">
                 <p class="list-title">{{ row.roomNumber }}</p>
-                <p class="list-subtitle">{{ row.roomTypeName }} · {{ row.floor }}F · {{ row.cleanStatus }}</p>
+                <p class="list-subtitle">{{ row.roomTypeName }} · {{ row.floor }} 层 · 清洁 {{ statusText(row.cleanStatus) }}</p>
               </div>
               <div
                 v-for="day in row.days"
@@ -1730,10 +1744,10 @@ onMounted(async () => {
                 <div class="calendar-tooltip">
                   <p>{{ row.roomNumber }} · {{ row.roomTypeName }}</p>
                   <p>日期：{{ day.date }}</p>
-                  <p>状态：{{ day.status }}</p>
+                  <p>状态：{{ day.status === 'CHECKED_IN' ? '在住' : day.status === 'BOOKED' ? '预订' : day.status === 'MAINTENANCE' ? '停用' : '空房' }}</p>
                   <p v-if="day.reservationNo">订单：{{ day.reservationNo }}</p>
                   <p v-if="day.guestName">住客：{{ day.guestName }}</p>
-                  <p>清洁：{{ row.cleanStatus }}</p>
+                  <p>清洁：{{ statusText(row.cleanStatus) }}</p>
                 </div>
               </div>
             </div>
@@ -1744,7 +1758,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Room Type Config</p>
+                <p class="section-label">房型配置</p>
                 <h2>{{ editingRoomTypeId ? '编辑房型' : '新增房型' }}</h2>
               </div>
             </div>
@@ -1769,7 +1783,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Query</p>
+                <p class="section-label">房型查询</p>
                 <h2>房型列表</h2>
               </div>
             </div>
@@ -1801,7 +1815,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Room Config</p>
+                <p class="section-label">房间配置</p>
                 <h2>{{ editingRoomId ? '编辑房间' : '新增房间' }}</h2>
               </div>
             </div>
@@ -1819,17 +1833,17 @@ onMounted(async () => {
                 <label>
                   销售状态
                   <select v-model="roomForm.status">
-                    <option value="AVAILABLE">AVAILABLE</option>
-                    <option value="OCCUPIED">OCCUPIED</option>
-                    <option value="MAINTENANCE">MAINTENANCE</option>
+                    <option value="AVAILABLE">空房</option>
+                    <option value="OCCUPIED">在住</option>
+                    <option value="MAINTENANCE">维修停用</option>
                   </select>
                 </label>
                 <label>
                   清洁状态
                   <select v-model="roomForm.cleanStatus">
-                    <option value="READY">READY</option>
-                    <option value="CLEANING">CLEANING</option>
-                    <option value="BLOCKED">BLOCKED</option>
+                    <option value="READY">已清洁</option>
+                    <option value="CLEANING">清洁中</option>
+                    <option value="BLOCKED">锁房</option>
                   </select>
                 </label>
                 <div class="form-actions full">
@@ -1844,7 +1858,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Filters</p>
+                <p class="section-label">筛选条件</p>
                 <h2>房间列表</h2>
               </div>
             </div>
@@ -1856,23 +1870,23 @@ onMounted(async () => {
               </select>
               <select v-model="roomFilters.status">
                 <option value="">全部销售状态</option>
-                <option value="AVAILABLE">AVAILABLE</option>
-                <option value="OCCUPIED">OCCUPIED</option>
-                <option value="MAINTENANCE">MAINTENANCE</option>
+                <option value="AVAILABLE">空房</option>
+                <option value="OCCUPIED">在住</option>
+                <option value="MAINTENANCE">维修停用</option>
               </select>
               <select v-model="roomFilters.cleanStatus">
                 <option value="">全部清洁状态</option>
-                <option value="READY">READY</option>
-                <option value="CLEANING">CLEANING</option>
-                <option value="BLOCKED">BLOCKED</option>
+                <option value="READY">已清洁</option>
+                <option value="CLEANING">清洁中</option>
+                <option value="BLOCKED">锁房</option>
               </select>
               <button class="secondary-button" @click="loadRoomPage(1)">筛选</button>
             </div>
             <div class="table-list">
               <article v-for="item in roomPage.records" :key="item.id" class="table-row">
                 <div>
-                  <p class="list-title">Room {{ item.roomNumber }} · {{ roomTypeName(item.roomTypeId) }}</p>
-                  <p class="list-subtitle">楼层 {{ item.floor }}F · {{ statusText(item.status) }} · {{ statusText(item.cleanStatus) }}</p>
+                  <p class="list-title">房间 {{ item.roomNumber }} · {{ roomTypeName(item.roomTypeId) }}</p>
+                  <p class="list-subtitle">{{ item.floor }} 层 · {{ statusText(item.status) }} · {{ statusText(item.cleanStatus) }}</p>
                 </div>
                 <div v-if="isAdmin" class="inline-actions">
                   <button class="secondary-button small" @click="startEditRoom(item)">编辑</button>
@@ -1892,7 +1906,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Reservation Operation</p>
+                <p class="section-label">订单操作</p>
                 <h2>{{ editingReservationId ? '编辑订单' : '新增订单' }}</h2>
               </div>
             </div>
@@ -1938,7 +1952,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Filters</p>
+                <p class="section-label">筛选条件</p>
                 <h2>订单列表</h2>
               </div>
             </div>
@@ -1963,15 +1977,15 @@ onMounted(async () => {
             <section v-if="selectedReservationOps" class="ops-card">
               <div class="section-head compact">
                 <div>
-                  <p class="section-label">Stay Operations</p>
-                  <h2>入住操作</h2>
+                <p class="section-label">在住操作</p>
+                <h2>入住操作</h2>
                 </div>
               </div>
               <div class="table-list">
                 <article class="summary-row">
                   <div>
                     <p class="list-title">{{ selectedReservationOps.guestName }} · {{ selectedReservationOps.roomNumber }}</p>
-                    <p class="list-subtitle">{{ selectedReservationOps.checkInDate }} 至 {{ selectedReservationOps.checkOutDate }} · {{ selectedReservationOps.status }}</p>
+                    <p class="list-subtitle">{{ selectedReservationOps.checkInDate }} 至 {{ selectedReservationOps.checkOutDate }} · {{ statusText(selectedReservationOps.status) }}</p>
                   </div>
                   <strong>{{ currency(selectedReservationOps.totalAmount) }}</strong>
                 </article>
@@ -2045,7 +2059,7 @@ onMounted(async () => {
             </div>
           </div>
           <div class="filter-grid">
-            <input v-model="financeFilters.reservationId" placeholder="订单 ID" />
+            <input v-model="financeFilters.reservationId" placeholder="订单号" />
             <select v-model="financeFilters.transactionType">
               <option value="">全部类型</option>
               <option value="ROOM_FEE">房费入账</option>
@@ -2096,7 +2110,7 @@ onMounted(async () => {
             </div>
           </div>
           <div class="filter-grid">
-            <input v-model="logFilters.reservationId" placeholder="订单 ID" />
+            <input v-model="logFilters.reservationId" placeholder="订单号" />
             <input v-model="logFilters.operatorUsername" placeholder="操作人" />
             <select v-model="logFilters.actionType">
               <option value="">全部动作</option>
@@ -2170,7 +2184,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Guest CRUD</p>
+                <p class="section-label">住客管理</p>
                 <h2>{{ editingGuestId ? '编辑住客' : '新增住客' }}</h2>
               </div>
             </div>
@@ -2181,9 +2195,9 @@ onMounted(async () => {
               <label>
                 会员等级
                 <select v-model="guestForm.memberLevel">
-                  <option value="REGULAR">REGULAR</option>
-                  <option value="GOLD">GOLD</option>
-                  <option value="PLATINUM">PLATINUM</option>
+                  <option value="REGULAR">普通会员</option>
+                  <option value="GOLD">黄金会员</option>
+                  <option value="PLATINUM">白金会员</option>
                 </select>
               </label>
               <label>备注<textarea v-model="guestForm.remark" rows="3"></textarea></label>
@@ -2197,7 +2211,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Filters</p>
+                <p class="section-label">筛选条件</p>
                 <h2>住客列表</h2>
               </div>
             </div>
@@ -2205,16 +2219,16 @@ onMounted(async () => {
               <input v-model="guestFilters.keyword" placeholder="姓名 / 手机 / 身份证" />
               <select v-model="guestFilters.memberLevel">
                 <option value="">全部会员等级</option>
-                <option value="REGULAR">REGULAR</option>
-                <option value="GOLD">GOLD</option>
-                <option value="PLATINUM">PLATINUM</option>
+                <option value="REGULAR">普通会员</option>
+                <option value="GOLD">黄金会员</option>
+                <option value="PLATINUM">白金会员</option>
               </select>
               <button class="secondary-button" @click="loadGuestPage(1)">筛选</button>
             </div>
             <div class="table-list">
               <article v-for="item in guestPage.records" :key="item.id" class="table-row">
                 <div>
-                  <p class="list-title">{{ item.fullName }} · {{ item.memberLevel }}</p>
+                  <p class="list-title">{{ item.fullName }} · {{ memberLevelText(item.memberLevel) }}</p>
                   <p class="list-subtitle">{{ item.phone }} · {{ item.idCard }}</p>
                 </div>
                 <div class="inline-actions">
@@ -2234,7 +2248,7 @@ onMounted(async () => {
           <section class="panel" v-if="selectedGuestProfile">
             <div class="section-head">
               <div>
-                <p class="section-label">Guest Profile</p>
+                <p class="section-label">住客画像</p>
                 <h2>{{ selectedGuestProfile.guest.fullName }}</h2>
               </div>
             </div>
@@ -2272,7 +2286,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Account & Role</p>
+                <p class="section-label">账户与角色</p>
                 <h2>{{ editingUserId ? '编辑账户' : '新增账户' }}</h2>
               </div>
             </div>
@@ -2282,15 +2296,15 @@ onMounted(async () => {
               <label>
                 用户角色
                 <select v-model="userForm.role">
-                  <option value="ADMIN">ADMIN</option>
-                  <option value="FRONT_DESK">FRONT_DESK</option>
+                  <option value="ADMIN">系统管理员</option>
+                  <option value="FRONT_DESK">前台专员</option>
                 </select>
               </label>
               <label>
                 账户状态
                 <select v-model="userForm.status">
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="DISABLED">DISABLED</option>
+                  <option value="ACTIVE">启用</option>
+                  <option value="DISABLED">停用</option>
                 </select>
               </label>
               <label>
@@ -2307,7 +2321,7 @@ onMounted(async () => {
           <section class="panel">
             <div class="section-head">
               <div>
-                <p class="section-label">Access Control</p>
+                <p class="section-label">权限管理</p>
                 <h2>用户与角色列表</h2>
               </div>
             </div>
@@ -2315,13 +2329,13 @@ onMounted(async () => {
               <input v-model="userFilters.keyword" placeholder="用户名 / 显示名称" />
               <select v-model="userFilters.role">
                 <option value="">全部角色</option>
-                <option value="ADMIN">ADMIN</option>
-                <option value="FRONT_DESK">FRONT_DESK</option>
+                <option value="ADMIN">系统管理员</option>
+                <option value="FRONT_DESK">前台专员</option>
               </select>
               <select v-model="userFilters.status">
                 <option value="">全部状态</option>
-                <option value="ACTIVE">ACTIVE</option>
-                <option value="DISABLED">DISABLED</option>
+                <option value="ACTIVE">启用</option>
+                <option value="DISABLED">停用</option>
               </select>
               <button class="secondary-button" @click="loadUserPage(1)">筛选</button>
             </div>
