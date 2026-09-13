@@ -77,7 +77,7 @@ public class ReportServiceImpl implements ReportService {
             workbook.write(outputStream);
             return outputStream.toByteArray();
         } catch (IOException ex) {
-            throw new RuntimeException("failed to export excel report", ex);
+            throw new RuntimeException("导出报表失败", ex);
         }
     }
 

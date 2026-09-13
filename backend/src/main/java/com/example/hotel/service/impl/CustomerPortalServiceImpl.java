@@ -53,10 +53,10 @@ public class CustomerPortalServiceImpl implements CustomerPortalService {
     public LoginVO login(CustomerLoginRequest request) {
         CustomerUser customerUser = customerUserService.getByPhone(request.phone());
         if (customerUser == null || !"ACTIVE".equals(customerUser.getStatus())) {
-            throw new BusinessException("Invalid phone or password");
+            throw new BusinessException("手机号或密码错误");
         }
         if (!passwordEncoder.matches(request.password(), customerUser.getPassword())) {
-            throw new BusinessException("Invalid phone or password");
+            throw new BusinessException("手机号或密码错误");
         }
         return buildLoginVO(customerUser);
     }
@@ -123,7 +123,7 @@ public class CustomerPortalServiceImpl implements CustomerPortalService {
         String username = SecurityUtil.currentUsername();
         CustomerUser customerUser = customerUserService.getByUsername(username);
         if (customerUser == null) {
-            throw new BusinessException("Unauthorized");
+            throw new BusinessException("登录已失效，请重新登录");
         }
         return customerUser;
     }

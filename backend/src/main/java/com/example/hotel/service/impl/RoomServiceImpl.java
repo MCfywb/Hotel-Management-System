@@ -38,7 +38,7 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements Ro
     public Room getDetail(Long id) {
         Room room = getById(id);
         if (room == null) {
-            throw new BusinessException("room does not exist");
+            throw new BusinessException("房间不存在");
         }
         return room;
     }
@@ -68,11 +68,11 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements Ro
     public void delete(Long id) {
         Room room = getDetail(id);
         if ("OCCUPIED".equals(room.getStatus())) {
-            throw new BusinessException("occupied room cannot be deleted");
+            throw new BusinessException("在住的房间不能删除");
         }
         Long reservationCount = reservationMapper.countByRoomId(id);
         if (reservationCount != null && reservationCount > 0) {
-            throw new BusinessException("room has reservations and cannot be deleted");
+            throw new BusinessException("该房间存在订单，不能删除");
         }
         removeById(id);
     }
@@ -80,7 +80,7 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements Ro
     @Override
     public List<RoomAvailabilityVO> listAvailableRooms(LocalDate checkIn, LocalDate checkOut) {
         if (!checkOut.isAfter(checkIn)) {
-            throw new BusinessException("checkOut must be later than checkIn");
+            throw new BusinessException("离店日期必须晚于入住日期");
         }
         return baseMapper.selectAvailableRooms(checkIn, checkOut);
     }
@@ -103,7 +103,7 @@ public class RoomServiceImpl extends ServiceImpl<RoomMapper, Room> implements Ro
                 .eq(Room::getRoomNumber, request.roomNumber())
                 .ne(currentId != null, Room::getId, currentId));
         if (duplicateCount > 0) {
-            throw new BusinessException("room number already exists");
+            throw new BusinessException("该房号已存在");
         }
     }
 

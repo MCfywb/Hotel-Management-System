@@ -425,7 +425,7 @@ async function requestJson(url, options = {}) {
   }
 
   if (response.status === 403) {
-    throw new Error(result.message === 'Forbidden' ? '当前账号没有权限执行这个操作' : (result.message || '当前账号没有权限执行这个操作'))
+    throw new Error(result.message || '当前账号没有权限执行这个操作')
   }
 
   if (!response.ok || !result.success) {

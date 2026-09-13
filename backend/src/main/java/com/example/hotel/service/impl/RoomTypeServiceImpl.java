@@ -33,7 +33,7 @@ public class RoomTypeServiceImpl extends ServiceImpl<RoomTypeMapper, RoomType> i
     public RoomType getDetail(Long id) {
         RoomType roomType = getById(id);
         if (roomType == null) {
-            throw new BusinessException("room type does not exist");
+            throw new BusinessException("房型不存在");
         }
         return roomType;
     }
@@ -62,7 +62,7 @@ public class RoomTypeServiceImpl extends ServiceImpl<RoomTypeMapper, RoomType> i
         getDetail(id);
         Long usedCount = roomMapper.countByRoomTypeId(id);
         if (usedCount != null && usedCount > 0) {
-            throw new BusinessException("room type is referenced by rooms and cannot be deleted");
+            throw new BusinessException("该房型已被房间引用，不能删除");
         }
         removeById(id);
     }

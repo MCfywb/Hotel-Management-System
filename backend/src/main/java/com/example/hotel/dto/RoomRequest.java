@@ -5,16 +5,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record RoomRequest(
-        @NotBlank(message = "roomNumber is required")
+        @NotBlank(message = "不能为空")
         String roomNumber,
-        @NotNull(message = "roomTypeId is required")
+        @NotNull(message = "不能为空")
         Long roomTypeId,
-        @NotNull(message = "floor is required")
-        @Min(value = 1, message = "floor must be at least 1")
+        @NotNull(message = "不能为空")
+        @Min(value = 1, message = "至少为 1")
         Integer floor,
-        @NotBlank(message = "status is required")
+        @NotBlank(message = "不能为空")
         String status,
-        @NotBlank(message = "cleanStatus is required")
+        @NotBlank(message = "不能为空")
         String cleanStatus
 ) {
 }

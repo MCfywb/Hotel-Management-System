@@ -37,10 +37,10 @@ public class AuthServiceImpl implements AuthService {
     public LoginVO login(LoginRequest request) {
         AdminUser adminUser = adminUserService.getByUsername(request.username());
         if (adminUser == null || !"ACTIVE".equals(adminUser.getStatus())) {
-            throw new BusinessException("Invalid username or password");
+            throw new BusinessException("用户名或密码错误");
         }
         if (!passwordEncoder.matches(request.password(), adminUser.getPassword())) {
-            throw new BusinessException("Invalid username or password");
+            throw new BusinessException("用户名或密码错误");
         }
 
         String token = jwtTokenProvider.generateToken(adminUser.getId(), adminUser.getUsername(), adminUser.getRole());
@@ -60,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
             String token = jwtTokenProvider.generateToken(customerUser.getId(), customerUser.getUsername(), "CUSTOMER");
             return new LoginVO(customerUser.getId(), customerUser.getUsername(), customerUser.getDisplayName(), "CUSTOMER", token);
         }
-        throw new BusinessException("Unauthorized");
+        throw new BusinessException("登录已失效，请重新登录");
     }
 
     @Override
@@ -73,15 +73,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void changePassword(ChangePasswordRequest request) {
         if (!request.newPassword().equals(request.confirmPassword())) {
-            throw new BusinessException("Passwords do not match");
+            throw new BusinessException("两次输入的密码不一致");
         }
         String username = SecurityUtil.currentUsername();
         AdminUser adminUser = adminUserService.getByUsername(username);
         if (adminUser == null) {
-            throw new BusinessException("Unauthorized");
+            throw new BusinessException("登录已失效，请重新登录");
         }
         if (!passwordEncoder.matches(request.oldPassword(), adminUser.getPassword())) {
-            throw new BusinessException("Old password is incorrect");
+            throw new BusinessException("当前密码不正确");
         }
         adminUser.setPassword(passwordEncoder.encode(request.newPassword()));
         adminUserService.updateById(adminUser);

@@ -10,23 +10,23 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record CreateReservationRequest(
-        @NotBlank(message = "guestName is required")
+        @NotBlank(message = "不能为空")
         String guestName,
-        @NotBlank(message = "phone is required")
-        @Pattern(regexp = "^1\\d{10}$", message = "phone format is invalid")
+        @NotBlank(message = "不能为空")
+        @Pattern(regexp = "^1\\d{10}$", message = "格式不正确")
         String phone,
-        @NotBlank(message = "idCard is required")
+        @NotBlank(message = "不能为空")
         String idCard,
-        @NotNull(message = "roomId is required")
+        @NotNull(message = "不能为空")
         Long roomId,
-        @NotNull(message = "checkInDate is required")
-        @FutureOrPresent(message = "checkInDate must be today or later")
+        @NotNull(message = "不能为空")
+        @FutureOrPresent(message = "不能早于今天")
         LocalDate checkInDate,
-        @NotNull(message = "checkOutDate is required")
+        @NotNull(message = "不能为空")
         LocalDate checkOutDate,
-        @NotNull(message = "guestCount is required")
-        @Min(value = 1, message = "guestCount must be at least 1")
-        @Max(value = 6, message = "guestCount cannot exceed 6")
+        @NotNull(message = "不能为空")
+        @Min(value = 1, message = "至少为 1")
+        @Max(value = 6, message = "不能超过 6")
         Integer guestCount,
         BigDecimal breakfastFee,
         BigDecimal extraBedFee,

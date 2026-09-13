@@ -4,12 +4,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record ChangePasswordRequest(
-        @NotBlank(message = "oldPassword is required")
+        @NotBlank(message = "不能为空")
         String oldPassword,
-        @NotBlank(message = "newPassword is required")
-        @Size(min = 6, max = 32, message = "newPassword length must be between 6 and 32")
+        @NotBlank(message = "不能为空")
+        @Size(min = 6, max = 32, message = "长度必须为 6 到 32 位")
         String newPassword,
-        @NotBlank(message = "confirmPassword is required")
+        @NotBlank(message = "不能为空")
         String confirmPassword
 ) {
 }

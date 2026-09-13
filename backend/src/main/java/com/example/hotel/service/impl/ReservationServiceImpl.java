@@ -91,7 +91,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     public ReservationVO updateReservation(Long id, CreateReservationRequest request) {
         Reservation reservation = getById(id);
         if (reservation == null) {
-            throw new BusinessException("reservation does not exist");
+            throw new BusinessException("订单不存在");
         }
 
         validateReservationRequest(request, id);
@@ -119,7 +119,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     public ReservationVO getReservationDetail(Long id) {
         ReservationVO detail = baseMapper.selectReservationDetailById(id);
         if (detail == null) {
-            throw new BusinessException("reservation does not exist");
+            throw new BusinessException("订单不存在");
         }
         return detail;
     }
@@ -129,7 +129,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     public void deleteReservation(Long id) {
         Reservation reservation = getById(id);
         if (reservation == null) {
-            throw new BusinessException("reservation does not exist");
+            throw new BusinessException("订单不存在");
         }
         operationLogService.logReservationAction(
                 "DELETE_RESERVATION",
@@ -164,7 +164,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     public ReservationVO updateReservationStatus(Long id, ReservationStatusRequest request) {
         Reservation reservation = getById(id);
         if (reservation == null) {
-            throw new BusinessException("reservation does not exist");
+            throw new BusinessException("订单不存在");
         }
 
         String targetStatus = request.status().toUpperCase();
@@ -176,14 +176,14 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
 
         Room room = roomService.getById(reservation.getRoomId());
         if (room == null) {
-            throw new BusinessException("room does not exist");
+            throw new BusinessException("房间不存在");
         }
 
         switch (currentStatus) {
             case "BOOKED" -> handleBookedTransition(reservation, room, targetStatus);
             case "CHECKED_IN" -> handleCheckedInTransition(reservation, room, targetStatus);
-            case "CHECKED_OUT", "CANCELLED" -> throw new BusinessException("completed reservation status cannot be changed");
-            default -> throw new BusinessException("unsupported reservation status");
+            case "CHECKED_OUT", "CANCELLED" -> throw new BusinessException("已完成或已取消的订单不能变更状态");
+            default -> throw new BusinessException("不支持的订单状态");
         }
 
         updateById(reservation);
@@ -211,7 +211,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     public ReservationVO extendReservation(Long id, ReservationExtendRequest request) {
         Reservation reservation = requireOperableReservation(id);
         if (!request.checkOutDate().isAfter(reservation.getCheckOutDate())) {
-            throw new BusinessException("new checkOutDate must be later than current checkOutDate");
+            throw new BusinessException("续住后的离店日期必须晚于当前离店日期");
         }
         Long conflictCount = baseMapper.countReservationConflicts(
                 reservation.getRoomId(),
@@ -220,7 +220,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
                 reservation.getId()
         );
         if (conflictCount != null && conflictCount > 0) {
-            throw new BusinessException("room is not available for the extended dates");
+            throw new BusinessException("续住日期内该房间不可用");
         }
         Reservation before = copyReservation(reservation);
         ReservationChargeBreakdownVO charges = calculateCharges(
@@ -262,10 +262,10 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
         Room currentRoom = roomService.getById(reservation.getRoomId());
         Room targetRoom = roomService.getById(request.roomId());
         if (targetRoom == null) {
-            throw new BusinessException("target room does not exist");
+            throw new BusinessException("目标房间不存在");
         }
         if ("MAINTENANCE".equals(targetRoom.getStatus())) {
-            throw new BusinessException("target room under maintenance cannot be assigned");
+            throw new BusinessException("维修中的房间不能分配");
         }
         Long conflictCount = baseMapper.countReservationConflicts(
                 targetRoom.getId(),
@@ -274,7 +274,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
                 reservation.getId()
         );
         if (conflictCount != null && conflictCount > 0) {
-            throw new BusinessException("target room is not available for the reservation dates");
+            throw new BusinessException("目标房间在预订日期内不可用");
         }
 
         Reservation before = copyReservation(reservation);
@@ -328,15 +328,15 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
 
     private void validateReservationRequest(CreateReservationRequest request, Long excludeId) {
         if (!request.checkOutDate().isAfter(request.checkInDate())) {
-            throw new BusinessException("checkOutDate must be later than checkInDate");
+            throw new BusinessException("离店日期必须晚于入住日期");
         }
 
         Room room = roomService.getById(request.roomId());
         if (room == null) {
-            throw new BusinessException("room does not exist");
+            throw new BusinessException("房间不存在");
         }
         if ("MAINTENANCE".equals(room.getStatus())) {
-            throw new BusinessException("room under maintenance cannot be reserved");
+            throw new BusinessException("维修中的房间不能预订");
         }
         Long conflictCount = baseMapper.countReservationConflicts(
                 request.roomId(),
@@ -345,7 +345,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
                 excludeId
         );
         if (conflictCount != null && conflictCount > 0) {
-            throw new BusinessException("room is not available for the selected dates");
+            throw new BusinessException("该房间在所选日期内不可用");
         }
     }
 
@@ -384,12 +384,12 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
                                                           BigDecimal couponAmount) {
         Room room = roomService.getById(roomId);
         if (room == null) {
-            throw new BusinessException("room does not exist");
+            throw new BusinessException("房间不存在");
         }
         RoomType roomType = roomTypeService.getDetail(room.getRoomTypeId());
         long nights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
         if (nights <= 0) {
-            throw new BusinessException("stay nights must be greater than 0");
+            throw new BusinessException("入住晚数必须大于 0");
         }
         BigDecimal roomFee = roomType.getBasePrice().multiply(BigDecimal.valueOf(nights));
         BigDecimal breakfast = safeMoney(breakfastFee);
@@ -416,7 +416,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     private ReservationPrintVO buildPrintDocument(Long id, String documentType) {
         Reservation reservationEntity = getById(id);
         if (reservationEntity == null) {
-            throw new BusinessException("reservation does not exist");
+            throw new BusinessException("订单不存在");
         }
         ReservationVO reservation = getReservationDetail(id);
         Guest guest = guestService.getDetail(reservation.getGuestId());
@@ -457,13 +457,13 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
                 room.setStatus("OCCUPIED");
             }
             case "CANCELLED" -> reservation.setStatus("CANCELLED");
-            default -> throw new BusinessException("invalid BOOKED transition");
+            default -> throw new BusinessException("已预订订单不能执行该操作");
         }
     }
 
     private void handleCheckedInTransition(Reservation reservation, Room room, String targetStatus) {
         if (!"CHECKED_OUT".equals(targetStatus)) {
-            throw new BusinessException("invalid CHECKED_IN transition");
+            throw new BusinessException("已入住订单不能执行该操作");
         }
         reservation.setStatus("CHECKED_OUT");
         reservation.setActualCheckOutTime(LocalDateTime.now());
@@ -473,10 +473,10 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     private Reservation requireOperableReservation(Long id) {
         Reservation reservation = getById(id);
         if (reservation == null) {
-            throw new BusinessException("reservation does not exist");
+            throw new BusinessException("订单不存在");
         }
         if ("CHECKED_OUT".equals(reservation.getStatus()) || "CANCELLED".equals(reservation.getStatus())) {
-            throw new BusinessException("completed reservation cannot be modified");
+            throw new BusinessException("已完成或已取消的订单不能修改");
         }
         return reservation;
     }

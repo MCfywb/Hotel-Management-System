@@ -64,7 +64,7 @@ public class NotificationServiceImpl extends ServiceImpl<NotificationMessageMapp
     public void markAsRead(Long id) {
         NotificationMessage message = getById(id);
         if (message == null) {
-            throw new BusinessException("notification does not exist");
+            throw new BusinessException("消息不存在");
         }
         message.setStatus("READ");
         message.setReadAt(LocalDateTime.now());

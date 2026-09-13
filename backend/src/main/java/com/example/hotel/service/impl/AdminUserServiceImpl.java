@@ -54,7 +54,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     public AdminUser createUser(UserRequest request) {
         validateUniqueUsername(request.username(), null);
         if (!StringUtils.hasText(request.password())) {
-            throw new BusinessException("Password is required");
+            throw new BusinessException("密码不能为空");
         }
         validateRole(request.role());
         validateStatus(request.status());
@@ -98,7 +98,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     public AdminUserVO updateUser(Long id, UserRequest request) {
         AdminUser adminUser = getById(id);
         if (adminUser == null) {
-            throw new BusinessException("User not found");
+            throw new BusinessException("用户不存在");
         }
         validateUniqueUsername(request.username(), id);
         validateRole(request.role());
@@ -122,7 +122,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
             return;
         }
         if ("admin".equals(adminUser.getUsername())) {
-            throw new BusinessException("Default admin account cannot be deleted");
+            throw new BusinessException("默认管理员账户不能删除");
         }
         removeById(id);
     }
@@ -130,13 +130,13 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     private void validateUniqueUsername(String username, Long currentId) {
         AdminUser existing = getByUsername(username.trim());
         if (existing != null && (currentId == null || !existing.getId().equals(currentId))) {
-            throw new BusinessException("Username already exists");
+            throw new BusinessException("用户名已存在");
         }
     }
 
     private void validatePasswords(String password, String confirmPassword) {
         if (!password.equals(confirmPassword)) {
-            throw new BusinessException("Passwords do not match");
+            throw new BusinessException("两次输入的密码不一致");
         }
     }
 
@@ -151,13 +151,13 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
 
     private void validateRole(String role) {
         if (!ALLOWED_ROLES.contains(role == null ? null : role.trim())) {
-            throw new BusinessException("Unsupported role");
+            throw new BusinessException("不支持的用户角色");
         }
     }
 
     private void validateStatus(String status) {
         if (!ALLOWED_STATUS.contains(status == null ? null : status.trim())) {
-            throw new BusinessException("Unsupported status");
+            throw new BusinessException("不支持的账户状态");
         }
     }
 

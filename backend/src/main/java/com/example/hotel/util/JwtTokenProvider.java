@@ -48,7 +48,7 @@ public class JwtTokenProvider {
             String role = claims.get("role", String.class);
             return new JwtUser(userId, username, role);
         } catch (Exception ex) {
-            throw new BusinessException("Unauthorized");
+            throw new BusinessException("登录已失效，请重新登录");
         }
     }
 

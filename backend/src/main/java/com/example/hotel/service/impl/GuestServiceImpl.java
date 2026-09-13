@@ -32,7 +32,7 @@ public class GuestServiceImpl extends ServiceImpl<GuestMapper, Guest> implements
         Guest guestByPhone = baseMapper.findByPhone(phone);
         Guest guestByIdCard = baseMapper.findByIdCard(idCard);
         if (guestByPhone != null && guestByIdCard != null && !guestByPhone.getId().equals(guestByIdCard.getId())) {
-            throw new BusinessException("guest phone and idCard belong to different guests");
+            throw new BusinessException("手机号与身份证号不属于同一位住客");
         }
 
         Guest guest = guestByPhone != null ? guestByPhone : guestByIdCard;
@@ -42,7 +42,7 @@ public class GuestServiceImpl extends ServiceImpl<GuestMapper, Guest> implements
             guest.setPhone(phone);
             guest.setIdCard(idCard);
             guest.setMemberLevel("REGULAR");
-            guest.setRemark("created by api");
+            guest.setRemark("由接口创建");
             save(guest);
             return guest;
         }
@@ -79,7 +79,7 @@ public class GuestServiceImpl extends ServiceImpl<GuestMapper, Guest> implements
     public Guest getDetail(Long id) {
         Guest guest = getById(id);
         if (guest == null) {
-            throw new BusinessException("guest does not exist");
+            throw new BusinessException("住客不存在");
         }
         return guest;
     }
@@ -141,13 +141,13 @@ public class GuestServiceImpl extends ServiceImpl<GuestMapper, Guest> implements
                 .eq(Guest::getPhone, request.phone())
                 .ne(excludeId != null, Guest::getId, excludeId));
         if (phoneCount > 0) {
-            throw new BusinessException("guest phone already exists");
+            throw new BusinessException("该手机号已被其他住客使用");
         }
         long idCardCount = count(new LambdaQueryWrapper<Guest>()
                 .eq(Guest::getIdCard, request.idCard())
                 .ne(excludeId != null, Guest::getId, excludeId));
         if (idCardCount > 0) {
-            throw new BusinessException("guest idCard already exists");
+            throw new BusinessException("该身份证号已被其他住客使用");
         }
     }
 

@@ -8,18 +8,18 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record CustomerReservationRequest(
-        @NotBlank(message = "idCard is required")
+        @NotBlank(message = "不能为空")
         String idCard,
-        @NotNull(message = "roomId is required")
+        @NotNull(message = "不能为空")
         Long roomId,
-        @NotNull(message = "checkInDate is required")
-        @FutureOrPresent(message = "checkInDate must be today or later")
+        @NotNull(message = "不能为空")
+        @FutureOrPresent(message = "不能早于今天")
         LocalDate checkInDate,
-        @NotNull(message = "checkOutDate is required")
+        @NotNull(message = "不能为空")
         LocalDate checkOutDate,
-        @NotNull(message = "guestCount is required")
-        @Min(value = 1, message = "guestCount must be at least 1")
-        @Max(value = 6, message = "guestCount cannot exceed 6")
+        @NotNull(message = "不能为空")
+        @Min(value = 1, message = "至少为 1")
+        @Max(value = 6, message = "不能超过 6")
         Integer guestCount,
         String specialRequest
 ) {

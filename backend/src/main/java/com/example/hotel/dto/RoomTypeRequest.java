@@ -6,21 +6,21 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public record RoomTypeRequest(
-        @NotBlank(message = "name is required")
+        @NotBlank(message = "不能为空")
         String name,
-        @NotNull(message = "basePrice is required")
+        @NotNull(message = "不能为空")
         BigDecimal basePrice,
-        @NotNull(message = "maxGuests is required")
-        @Min(value = 1, message = "maxGuests must be at least 1")
+        @NotNull(message = "不能为空")
+        @Min(value = 1, message = "至少为 1")
         Integer maxGuests,
-        @NotBlank(message = "bedType is required")
+        @NotBlank(message = "不能为空")
         String bedType,
-        @NotNull(message = "area is required")
-        @Min(value = 1, message = "area must be at least 1")
+        @NotNull(message = "不能为空")
+        @Min(value = 1, message = "至少为 1")
         Integer area,
-        @NotBlank(message = "description is required")
+        @NotBlank(message = "不能为空")
         String description,
-        @NotBlank(message = "amenities is required")
+        @NotBlank(message = "不能为空")
         String amenities
 ) {
 }

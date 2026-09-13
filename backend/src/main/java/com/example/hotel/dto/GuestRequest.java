@@ -3,13 +3,13 @@ package com.example.hotel.dto;
 import jakarta.validation.constraints.NotBlank;
 
 public record GuestRequest(
-        @NotBlank(message = "fullName is required")
+        @NotBlank(message = "不能为空")
         String fullName,
-        @NotBlank(message = "phone is required")
+        @NotBlank(message = "不能为空")
         String phone,
-        @NotBlank(message = "idCard is required")
+        @NotBlank(message = "不能为空")
         String idCard,
-        @NotBlank(message = "memberLevel is required")
+        @NotBlank(message = "不能为空")
         String memberLevel,
         String remark
 ) {

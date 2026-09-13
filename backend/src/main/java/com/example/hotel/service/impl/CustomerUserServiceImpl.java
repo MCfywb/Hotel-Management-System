@@ -31,10 +31,10 @@ public class CustomerUserServiceImpl extends ServiceImpl<CustomerUserMapper, Cus
     @Override
     public CustomerUser register(CustomerRegisterRequest request) {
         if (!request.password().equals(request.confirmPassword())) {
-            throw new BusinessException("Passwords do not match");
+            throw new BusinessException("两次输入的密码不一致");
         }
         if (getByPhone(request.phone()) != null) {
-            throw new BusinessException("Phone already registered");
+            throw new BusinessException("该手机号已注册");
         }
         CustomerUser customerUser = new CustomerUser();
         customerUser.setUsername(request.phone());

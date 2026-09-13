@@ -3,9 +3,9 @@ package com.example.hotel.dto;
 import jakarta.validation.constraints.NotBlank;
 
 public record LoginRequest(
-        @NotBlank(message = "username is required")
+        @NotBlank(message = "不能为空")
         String username,
-        @NotBlank(message = "password is required")
+        @NotBlank(message = "不能为空")
         String password
 ) {
 }
