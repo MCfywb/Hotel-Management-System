@@ -7,7 +7,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/hotel_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
-    password: 123456
+    password: 'MCfywb123QW'
     driver-class-name: com.mysql.cj.jdbc.Driver
   jackson:
     default-property-inclusion: non_null
