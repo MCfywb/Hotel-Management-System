@@ -1188,30 +1188,6 @@ onMounted(async () => {
                 <h1 class="login-title">酒店工作台</h1>
               </div>
             </div>
-
-            <div class="brand-notes poster-notes">
-              <article class="brand-note">
-                <span class="brand-note-index">01</span>
-                <div>
-                  <p class="list-title">前台接待</p>
-                  <p class="list-subtitle">入住、离店、打印单据与住客登记集中处理。</p>
-                </div>
-              </article>
-              <article class="brand-note">
-                <span class="brand-note-index">02</span>
-                <div>
-                  <p class="list-title">订单流转</p>
-                  <p class="list-subtitle">预订、入住、退房、取消状态按日常流程推进。</p>
-                </div>
-              </article>
-              <article class="brand-note">
-                <span class="brand-note-index">03</span>
-                <div>
-                  <p class="list-title">经营分析</p>
-                  <p class="list-subtitle">趋势、报表、消费统计与房态数据保持同一视角。</p>
-                </div>
-              </article>
-            </div>
           </div>
         </div>
 
