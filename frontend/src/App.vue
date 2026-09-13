@@ -29,24 +29,6 @@ const defaultReservationForm = () => ({
   specialRequest: '',
 })
 
-const defaultRoomTypeForm = () => ({
-  name: '',
-  basePrice: 498,
-  maxGuests: 2,
-  bedType: '1.8 米大床',
-  area: 32,
-  description: '',
-  amenities: '',
-})
-
-const defaultRoomForm = () => ({
-  roomNumber: '',
-  roomTypeId: '',
-  floor: 8,
-  status: 'AVAILABLE',
-  cleanStatus: 'READY',
-})
-
 const defaultGuestForm = () => ({
   fullName: '',
   phone: '',
@@ -138,8 +120,6 @@ const trends = ref({
 
 const roomTypeList = ref([])
 const roomCatalog = ref([])
-const roomTypePage = ref(createPager())
-const roomPage = ref(createPager())
 const reservationPage = ref(createPager())
 const guestPage = ref(createPager())
 const userPage = ref(createPager())
@@ -162,8 +142,6 @@ const financeSummary = ref({
   netTotal: 0,
 })
 
-const roomTypeFilters = ref({ keyword: '' })
-const roomFilters = ref({ keyword: '', roomTypeId: '', status: '', cleanStatus: '' })
 const reservationFilters = ref({ keyword: '', status: '', channel: '', roomNumber: '' })
 const guestFilters = ref({ keyword: '', memberLevel: '' })
 const userFilters = ref({ keyword: '', role: '', status: '' })
@@ -177,13 +155,9 @@ const reservationOpsForm = ref({
   changeReason: '',
 })
 
-const roomTypeForm = ref(defaultRoomTypeForm())
-const roomForm = ref(defaultRoomForm())
 const reservationForm = ref(defaultReservationForm())
 const guestForm = ref(defaultGuestForm())
 
-const editingRoomTypeId = ref(null)
-const editingRoomId = ref(null)
 const editingReservationId = ref(null)
 const editingGuestId = ref(null)
 const editingUserId = ref(null)
@@ -194,10 +168,12 @@ const roleLabel = computed(() => {
   if (isCustomer.value) return '住客用户'
   return isAdmin.value ? '管理员角色' : '前台角色'
 })
+// 「房型」「房间」两个管理页面已按需求下线，入口从这里移除；
+// 后端接口、room / room_type 数据表和其他页面（订单、房态日历、住客端）对这些数据的依赖保持原样。
 const visibleTabs = computed(() =>
   isAdmin.value
-    ? ['dashboard', 'calendar', 'reservations', 'finance', 'logs', 'messages', 'room-types', 'rooms', 'guests', 'users']
-    : ['dashboard', 'calendar', 'reservations', 'finance', 'logs', 'messages', 'guests', 'rooms']
+    ? ['dashboard', 'calendar', 'reservations', 'finance', 'logs', 'messages', 'guests', 'users']
+    : ['dashboard', 'calendar', 'reservations', 'finance', 'logs', 'messages', 'guests']
 )
 
 const stats = computed(() => [
@@ -470,23 +446,6 @@ async function loadCurrentUser() {
   currentUser.value = await requestJson('/api/v1/auth/me')
 }
 
-async function loadRoomTypePage(pageNo = roomTypePage.value.pageNo) {
-  const query = queryString({ pageNo, pageSize: roomTypePage.value.pageSize, ...roomTypeFilters.value })
-  roomTypePage.value = await requestJson(`/api/v1/room-types/page?${query}`)
-}
-
-async function loadRoomPage(pageNo = roomPage.value.pageNo) {
-  const query = queryString({
-    pageNo,
-    pageSize: roomPage.value.pageSize,
-    keyword: roomFilters.value.keyword,
-    roomTypeId: roomFilters.value.roomTypeId,
-    status: roomFilters.value.status,
-    cleanStatus: roomFilters.value.cleanStatus,
-  })
-  roomPage.value = await requestJson(`/api/v1/rooms/page?${query}`)
-}
-
 async function loadReservationPage(pageNo = reservationPage.value.pageNo) {
   const query = queryString({ pageNo, pageSize: reservationPage.value.pageSize, ...reservationFilters.value })
   reservationPage.value = await requestJson(`/api/v1/reservations/page?${query}`)
@@ -566,8 +525,6 @@ async function loadAllData() {
     } else {
       await loadDashboard()
       await Promise.all([
-        loadRoomTypePage(1),
-        loadRoomPage(1),
         loadReservationPage(1),
         loadRoomCalendar(),
         loadFinancePage(1),
@@ -708,16 +665,6 @@ function clearMessages() {
   successMessage.value = ''
 }
 
-function resetRoomTypeForm() {
-  roomTypeForm.value = defaultRoomTypeForm()
-  editingRoomTypeId.value = null
-}
-
-function resetRoomForm() {
-  roomForm.value = defaultRoomForm()
-  editingRoomId.value = null
-}
-
 function resetReservationForm() {
   reservationForm.value = defaultReservationForm()
   editingReservationId.value = null
@@ -735,24 +682,6 @@ function resetUserForm() {
 
 function resetCustomerReservationForm() {
   customerReservationForm.value = defaultCustomerReservationForm()
-}
-
-function startEditRoomType(item) {
-  roomTypeForm.value = { ...item }
-  editingRoomTypeId.value = item.id
-  activeTab.value = 'room-types'
-}
-
-function startEditRoom(item) {
-  roomForm.value = {
-    roomNumber: item.roomNumber,
-    roomTypeId: item.roomTypeId,
-    floor: item.floor,
-    status: item.status,
-    cleanStatus: item.cleanStatus,
-  }
-  editingRoomId.value = item.id
-  activeTab.value = 'rooms'
 }
 
 function startEditReservation(item) {
@@ -799,55 +728,6 @@ function startEditUser(item) {
   }
   editingUserId.value = item.id
   activeTab.value = 'users'
-}
-
-async function saveRoomType() {
-  actionLoading.value = true
-  clearMessages()
-  try {
-    const url = editingRoomTypeId.value ? `/api/v1/room-types/${editingRoomTypeId.value}` : '/api/v1/room-types'
-    const method = editingRoomTypeId.value ? 'PUT' : 'POST'
-    await requestJson(url, {
-      method,
-      body: JSON.stringify({
-        ...roomTypeForm.value,
-        basePrice: Number(roomTypeForm.value.basePrice),
-        maxGuests: Number(roomTypeForm.value.maxGuests),
-        area: Number(roomTypeForm.value.area),
-      }),
-    })
-    successMessage.value = editingRoomTypeId.value ? '房型已更新' : '房型已创建'
-    resetRoomTypeForm()
-    await Promise.all([loadDashboard(), loadRoomTypePage(1)])
-  } catch (error) {
-    errorMessage.value = error.message
-  } finally {
-    actionLoading.value = false
-  }
-}
-
-async function saveRoom() {
-  actionLoading.value = true
-  clearMessages()
-  try {
-    const url = editingRoomId.value ? `/api/v1/rooms/${editingRoomId.value}` : '/api/v1/rooms'
-    const method = editingRoomId.value ? 'PUT' : 'POST'
-    await requestJson(url, {
-      method,
-      body: JSON.stringify({
-        ...roomForm.value,
-        roomTypeId: Number(roomForm.value.roomTypeId),
-        floor: Number(roomForm.value.floor),
-      }),
-    })
-    successMessage.value = editingRoomId.value ? '房间已更新' : '房间已创建'
-    resetRoomForm()
-    await Promise.all([loadDashboard(), loadRoomPage(1)])
-  } catch (error) {
-    errorMessage.value = error.message
-  } finally {
-    actionLoading.value = false
-  }
 }
 
 async function saveReservation() {
@@ -953,8 +833,6 @@ async function removeItem(type, id) {
   clearMessages()
   try {
     const urlMap = {
-      roomType: `/api/v1/room-types/${id}`,
-      room: `/api/v1/rooms/${id}`,
       reservation: `/api/v1/reservations/${id}`,
       guest: `/api/v1/guests/${id}`,
       user: `/api/v1/users/${id}`,
@@ -963,8 +841,6 @@ async function removeItem(type, id) {
     successMessage.value = '数据已删除'
     await Promise.all([
       loadDashboard(),
-      loadRoomTypePage(),
-      loadRoomPage(),
       loadReservationPage(),
       loadFinancePage(),
       loadLogPage(),
@@ -992,7 +868,6 @@ async function changeReservationStatus(item, status) {
     await Promise.all([
       loadDashboard(),
       loadReservationPage(reservationPage.value.pageNo),
-      loadRoomPage(roomPage.value.pageNo),
       loadRoomCalendar(),
       loadFinancePage(1),
       loadLogPage(1),
@@ -1046,7 +921,6 @@ async function changeReservationRoom() {
     await Promise.all([
       loadDashboard(),
       loadReservationPage(reservationPage.value.pageNo),
-      loadRoomPage(roomPage.value.pageNo),
       loadRoomCalendar(),
       loadFinancePage(1),
       loadLogPage(1),
@@ -1163,8 +1037,6 @@ function tabLabel(tab) {
   return {
     dashboard: '概览',
     calendar: '房态',
-    'room-types': '房型',
-    rooms: '房间',
     reservations: '订单',
     finance: '流水',
     logs: '日志',
@@ -1752,154 +1624,6 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-        </section>
-
-        <section v-if="activeTab === 'room-types'" class="split-layout">
-          <section class="panel">
-            <div class="section-head">
-              <div>
-                <p class="section-label">房型配置</p>
-                <h2>{{ editingRoomTypeId ? '编辑房型' : '新增房型' }}</h2>
-              </div>
-            </div>
-            <template v-if="isAdmin">
-              <form class="editor-form" @submit.prevent="saveRoomType">
-                <label>房型名称<input v-model="roomTypeForm.name" type="text" /></label>
-                <label>基础价格<input v-model="roomTypeForm.basePrice" type="number" min="0" /></label>
-                <label>最大入住<input v-model="roomTypeForm.maxGuests" type="number" min="1" /></label>
-                <label>床型<input v-model="roomTypeForm.bedType" type="text" /></label>
-                <label>面积<input v-model="roomTypeForm.area" type="number" min="1" /></label>
-                <label class="full">描述<textarea v-model="roomTypeForm.description" rows="3"></textarea></label>
-                <label class="full">设施<input v-model="roomTypeForm.amenities" type="text" /></label>
-                <div class="form-actions full">
-                  <button class="primary-button" type="submit">{{ actionLoading ? '保存中...' : '保存房型' }}</button>
-                  <button class="secondary-button" type="button" @click="resetRoomTypeForm">重置</button>
-                </div>
-              </form>
-            </template>
-            <p v-else class="empty-note">前台角色仅可查看房型配置，不能修改。</p>
-          </section>
-
-          <section class="panel">
-            <div class="section-head">
-              <div>
-                <p class="section-label">房型查询</p>
-                <h2>房型列表</h2>
-              </div>
-            </div>
-            <div class="filter-bar">
-              <input v-model="roomTypeFilters.keyword" placeholder="搜索房型名称" />
-              <button class="secondary-button" @click="loadRoomTypePage(1)">筛选</button>
-            </div>
-            <div class="table-list">
-              <article v-for="item in roomTypePage.records" :key="item.id" class="table-row">
-                <div>
-                  <p class="list-title">{{ item.name }}</p>
-                  <p class="list-subtitle">{{ currency(item.basePrice) }} · {{ item.maxGuests }} 位 · {{ item.area }}㎡</p>
-                </div>
-                <div v-if="isAdmin" class="inline-actions">
-                  <button class="secondary-button small" @click="startEditRoomType(item)">编辑</button>
-                  <button class="secondary-button small danger" @click="removeItem('roomType', item.id)">删除</button>
-                </div>
-              </article>
-            </div>
-            <div class="pager">
-              <button class="secondary-button small" @click="goPage(loadRoomTypePage, roomTypePage, roomTypePage.pageNo - 1)">上一页</button>
-              <span>第 {{ roomTypePage.pageNo }} / {{ roomTypePage.totalPages || 1 }} 页</span>
-              <button class="secondary-button small" @click="goPage(loadRoomTypePage, roomTypePage, roomTypePage.pageNo + 1)">下一页</button>
-            </div>
-          </section>
-        </section>
-
-        <section v-if="activeTab === 'rooms'" class="split-layout">
-          <section class="panel">
-            <div class="section-head">
-              <div>
-                <p class="section-label">房间配置</p>
-                <h2>{{ editingRoomId ? '编辑房间' : '新增房间' }}</h2>
-              </div>
-            </div>
-            <template v-if="isAdmin">
-              <form class="editor-form" @submit.prevent="saveRoom">
-                <label>房号<input v-model="roomForm.roomNumber" type="text" /></label>
-                <label>
-                  房型
-                  <select v-model="roomForm.roomTypeId">
-                    <option value="">请选择</option>
-                    <option v-for="item in roomTypeList" :key="item.id" :value="item.id">{{ item.name }}</option>
-                  </select>
-                </label>
-                <label>楼层<input v-model="roomForm.floor" type="number" min="1" /></label>
-                <label>
-                  销售状态
-                  <select v-model="roomForm.status">
-                    <option value="AVAILABLE">空房</option>
-                    <option value="OCCUPIED">在住</option>
-                    <option value="MAINTENANCE">维修停用</option>
-                  </select>
-                </label>
-                <label>
-                  清洁状态
-                  <select v-model="roomForm.cleanStatus">
-                    <option value="READY">已清洁</option>
-                    <option value="CLEANING">清洁中</option>
-                    <option value="BLOCKED">锁房</option>
-                  </select>
-                </label>
-                <div class="form-actions full">
-                  <button class="primary-button" type="submit">{{ actionLoading ? '保存中...' : '保存房间' }}</button>
-                  <button class="secondary-button" type="button" @click="resetRoomForm">重置</button>
-                </div>
-              </form>
-            </template>
-            <p v-else class="empty-note">前台角色仅可查看房间配置，不能修改。</p>
-          </section>
-
-          <section class="panel">
-            <div class="section-head">
-              <div>
-                <p class="section-label">筛选条件</p>
-                <h2>房间列表</h2>
-              </div>
-            </div>
-            <div class="filter-grid">
-              <input v-model="roomFilters.keyword" placeholder="房号搜索" />
-              <select v-model="roomFilters.roomTypeId">
-                <option value="">全部房型</option>
-                <option v-for="item in roomTypeList" :key="item.id" :value="item.id">{{ item.name }}</option>
-              </select>
-              <select v-model="roomFilters.status">
-                <option value="">全部销售状态</option>
-                <option value="AVAILABLE">空房</option>
-                <option value="OCCUPIED">在住</option>
-                <option value="MAINTENANCE">维修停用</option>
-              </select>
-              <select v-model="roomFilters.cleanStatus">
-                <option value="">全部清洁状态</option>
-                <option value="READY">已清洁</option>
-                <option value="CLEANING">清洁中</option>
-                <option value="BLOCKED">锁房</option>
-              </select>
-              <button class="secondary-button" @click="loadRoomPage(1)">筛选</button>
-            </div>
-            <div class="table-list">
-              <article v-for="item in roomPage.records" :key="item.id" class="table-row">
-                <div>
-                  <p class="list-title">房间 {{ item.roomNumber }} · {{ roomTypeName(item.roomTypeId) }}</p>
-                  <p class="list-subtitle">{{ item.floor }} 层 · {{ statusText(item.status) }} · {{ statusText(item.cleanStatus) }}</p>
-                </div>
-                <div v-if="isAdmin" class="inline-actions">
-                  <button class="secondary-button small" @click="startEditRoom(item)">编辑</button>
-                  <button class="secondary-button small danger" @click="removeItem('room', item.id)">删除</button>
-                </div>
-              </article>
-            </div>
-            <div class="pager">
-              <button class="secondary-button small" @click="goPage(loadRoomPage, roomPage, roomPage.pageNo - 1)">上一页</button>
-              <span>第 {{ roomPage.pageNo }} / {{ roomPage.totalPages || 1 }} 页</span>
-              <button class="secondary-button small" @click="goPage(loadRoomPage, roomPage, roomPage.pageNo + 1)">下一页</button>
-            </div>
-          </section>
         </section>
 
         <section v-if="activeTab === 'reservations'" class="split-layout reservations-layout">

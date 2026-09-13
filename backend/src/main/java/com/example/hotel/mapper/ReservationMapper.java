@@ -118,13 +118,6 @@ public interface ReservationMapper extends BaseMapper<Reservation> {
                                    @Param("excludeId") Long excludeId);
 
     @Select("""
-            select count(*)
-            from reservation
-            where room_id = #{roomId}
-            """)
-    Long countByRoomId(@Param("roomId") Long roomId);
-
-    @Select("""
             <script>
             select
                 r.id,
