@@ -1,7 +1,6 @@
 .DS_Store
 .idea/
 .vscode/
-.workbuddy/
 
 backend/target/
 backend/.mvn/
