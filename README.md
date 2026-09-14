@@ -17,9 +17,6 @@
 - 经营分析看板：概览指标、趋势图、Excel 报表导出
 - 极简中后台 UI：统一信息结构、轻量视觉语言、适合演示与二次开发
 
-## 更新日志
-
-项目每日更新记录见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 技术架构
 
@@ -101,19 +98,6 @@
 - 查看个人订单
 - 查看个人资料与会员等级
 
-## 系统截图
-
-### 管理员工作台
-
-![管理员工作台](docs/screenshots/admin-dashboard.png)
-
-### 前台工作台
-
-![前台工作台](docs/screenshots/frontdesk-dashboard.png)
-
-### 住客中心
-
-![住客中心](docs/screenshots/guest-portal.png)
 
 ## 目录结构
 
@@ -121,8 +105,7 @@
 .
 ├── backend                     # Spring Boot 接口服务
 ├── frontend                    # Vue 3 + Vite 前端
-├── database                    # MySQL 初始化脚本与增量脚本
-└── docs/screenshots            # README 展示截图
+└── database                    # MySQL 初始化脚本与增量脚本
 ```
 
 ## 业务角色说明
@@ -152,15 +135,10 @@
 
 ### 1. 初始化数据库
 
-导入以下脚本：
+新建数据库`hotel_management`并导入以下脚本：
 
 - [database/hotel_management.sql](database/hotel_management.sql)
 
-如果你需要按增量方式同步结构，也可以执行：
-
-- [database/migrations/2026-04-22_reservation_charge_breakdown.sql](database/migrations/2026-04-22_reservation_charge_breakdown.sql)
-- [database/migrations/2026-04-22_customer_user.sql](database/migrations/2026-04-22_customer_user.sql)
-- [database/migrations/2026-04-23_hotel_ops_extension.sql](database/migrations/2026-04-23_hotel_ops_extension.sql)
 
 ### 2. 配置数据库连接
 
@@ -183,8 +161,8 @@ mvn spring-boot:run
 
 ```bash
 cd frontend
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 默认地址：`http://localhost:5174`
@@ -203,8 +181,8 @@ pnpm dev
 
 ### 住客端示例账号
 
-- 账号：`13900000088`
-- 密码：`guest123`
+- 账号：`12345678901`
+- 密码：`123456`
 
 ## 关键接口示例
 
@@ -325,23 +303,3 @@ pnpm dev
 - 订单合计 = 房费 + 早餐费 + 加床费 + 押金 - 优惠券
 
 最终金额以后端计算并落库结果为准。
-
-## 项目适用场景
-
-- Java 全栈课程设计
-- 酒店管理系统毕业设计
-- Spring Boot + Vue 前后端分离练手项目
-- 业务后台管理系统原型演示
-
-## 后续可扩展方向
-
-- 接入 Redis 做热点缓存与会话强化
-- 补充操作日志与审计记录
-- 对接短信通知与邮件提醒
-- 接入对象存储管理住客证件与附件
-- 拆分更细粒度菜单权限与按钮权限
-- 提供 Docker Compose 一键部署
-
-## 许可说明
-
-本项目当前更适合作为学习、演示与个人作品集项目使用，如需商用，建议补充更完整的安全、审计、监控与部署方案。

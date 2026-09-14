@@ -1,200 +1,268 @@
-CREATE DATABASE IF NOT EXISTS hotel_management
-DEFAULT CHARACTER SET utf8mb4
-COLLATE utf8mb4_0900_ai_ci;
+/*
+ Navicat Premium Dump SQL
 
-USE hotel_management;
+ Source Server         : MC风月无边
+ Source Server Type    : MySQL
+ Source Server Version : 260700 (26.7.0)
+ Source Host           : localhost:3306
+ Source Schema         : hotel_management
 
-DROP TABLE IF EXISTS notification_message;
-DROP TABLE IF EXISTS operation_log;
-DROP TABLE IF EXISTS financial_transaction;
-DROP TABLE IF EXISTS reservation;
-DROP TABLE IF EXISTS customer_user;
-DROP TABLE IF EXISTS admin_user;
-DROP TABLE IF EXISTS guest;
-DROP TABLE IF EXISTS room;
-DROP TABLE IF EXISTS room_type;
+ Target Server Type    : MySQL
+ Target Server Version : 260700 (26.7.0)
+ File Encoding         : 65001
 
-CREATE TABLE room_type (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(64) NOT NULL,
-    base_price DECIMAL(10, 2) NOT NULL,
-    max_guests INT NOT NULL,
-    bed_type VARCHAR(64) NOT NULL,
-    area INT NOT NULL,
-    description VARCHAR(255) NOT NULL,
-    amenities VARCHAR(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ Date: 14/09/2026 12:46:28
+*/
 
-CREATE TABLE room (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    room_number VARCHAR(32) NOT NULL UNIQUE,
-    room_type_id BIGINT NOT NULL,
-    floor INT NOT NULL,
-    status VARCHAR(32) NOT NULL,
-    clean_status VARCHAR(32) NOT NULL,
-    CONSTRAINT fk_room_room_type FOREIGN KEY (room_type_id) REFERENCES room_type(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
-CREATE TABLE guest (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    full_name VARCHAR(64) NOT NULL,
-    phone VARCHAR(20) NOT NULL UNIQUE,
-    id_card VARCHAR(32) NOT NULL,
-    member_level VARCHAR(32) NOT NULL,
-    remark VARCHAR(255)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- ----------------------------
+-- Table structure for admin_user
+-- ----------------------------
+DROP TABLE IF EXISTS `admin_user`;
+CREATE TABLE `admin_user`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `display_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `role` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `status` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `username`(`username` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
-CREATE TABLE admin_user (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(64) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    display_name VARCHAR(64) NOT NULL,
-    role VARCHAR(32) NOT NULL,
-    status VARCHAR(32) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- ----------------------------
+-- Records of admin_user
+-- ----------------------------
+INSERT INTO `admin_user` VALUES (1, 'admin', '$2a$10$eS0Rstli0HC4vTuC0PLSJegYry1d8yjhtbdPMKZ9CQhWxbEIhrZPK', '系统管理员', 'ADMIN', 'ACTIVE');
+INSERT INTO `admin_user` VALUES (2, 'frontdesk', '$2a$10$yg5hdwvcNd4e8Zn187YLV.KtmpACbBFTIzl9qbnbHf5IutoA9Absy', '前台专员', 'FRONT_DESK', 'ACTIVE');
 
-CREATE TABLE customer_user (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(64) NOT NULL UNIQUE,
-    phone VARCHAR(20) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    display_name VARCHAR(64) NOT NULL,
-    member_level VARCHAR(32) NOT NULL,
-    status VARCHAR(32) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- ----------------------------
+-- Table structure for customer_user
+-- ----------------------------
+DROP TABLE IF EXISTS `customer_user`;
+CREATE TABLE `customer_user`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `display_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `member_level` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `status` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `username`(`username` ASC) USING BTREE,
+  UNIQUE INDEX `phone`(`phone` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
-CREATE TABLE reservation (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    reservation_no VARCHAR(40) NOT NULL UNIQUE,
-    guest_id BIGINT NOT NULL,
-    room_id BIGINT NOT NULL,
-    check_in_date DATE NOT NULL,
-    check_out_date DATE NOT NULL,
-    guest_count INT NOT NULL,
-    room_fee DECIMAL(10, 2) NOT NULL DEFAULT 0,
-    breakfast_fee DECIMAL(10, 2) NOT NULL DEFAULT 0,
-    extra_bed_fee DECIMAL(10, 2) NOT NULL DEFAULT 0,
-    deposit_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
-    coupon_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
-    total_amount DECIMAL(10, 2) NOT NULL,
-    status VARCHAR(32) NOT NULL,
-    channel VARCHAR(32) NOT NULL,
-    special_request VARCHAR(255),
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    actual_check_in_time DATETIME NULL,
-    actual_check_out_time DATETIME NULL,
-    CONSTRAINT fk_reservation_guest FOREIGN KEY (guest_id) REFERENCES guest(id),
-    CONSTRAINT fk_reservation_room FOREIGN KEY (room_id) REFERENCES room(id),
-    INDEX idx_reservation_room_dates (room_id, check_in_date, check_out_date),
-    INDEX idx_reservation_status_dates (status, check_in_date, check_out_date)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- ----------------------------
+-- Records of customer_user
+-- ----------------------------
+INSERT INTO `customer_user` VALUES (1, '12345678901', '12345678901', '$2a$10$SA3b3YpLzaAxUwhf.7W2X.hzJxw2nkcwONS3o20HToAS9VI8YkjFW', 'MC风月无边', 'REGULAR', 'ACTIVE');
 
-CREATE TABLE financial_transaction (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    reservation_id BIGINT NOT NULL,
-    reservation_no VARCHAR(40) NOT NULL,
-    transaction_type VARCHAR(64) NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    direction VARCHAR(32) NOT NULL,
-    remark VARCHAR(255),
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_financial_transaction_reservation FOREIGN KEY (reservation_id) REFERENCES reservation(id),
-    INDEX idx_financial_transaction_reservation (reservation_id, created_at),
-    INDEX idx_financial_transaction_type (transaction_type, direction)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- ----------------------------
+-- Table structure for financial_transaction
+-- ----------------------------
+DROP TABLE IF EXISTS `financial_transaction`;
+CREATE TABLE `financial_transaction`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `reservation_id` bigint NOT NULL,
+  `reservation_no` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `transaction_type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `amount` decimal(10, 2) NOT NULL,
+  `direction` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_financial_transaction_reservation`(`reservation_id` ASC, `created_at` ASC) USING BTREE,
+  INDEX `idx_financial_transaction_type`(`transaction_type` ASC, `direction` ASC) USING BTREE,
+  CONSTRAINT `fk_financial_transaction_reservation` FOREIGN KEY (`reservation_id`) REFERENCES `reservation` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
-CREATE TABLE operation_log (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    reservation_id BIGINT NULL,
-    room_id BIGINT NULL,
-    operator_username VARCHAR(64) NOT NULL,
-    operator_role VARCHAR(32) NOT NULL,
-    action_type VARCHAR(64) NOT NULL,
-    description VARCHAR(255) NOT NULL,
-    before_snapshot VARCHAR(500),
-    after_snapshot VARCHAR(500),
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_operation_log_reservation FOREIGN KEY (reservation_id) REFERENCES reservation(id),
-    CONSTRAINT fk_operation_log_room FOREIGN KEY (room_id) REFERENCES room(id),
-    INDEX idx_operation_log_reservation (reservation_id, created_at),
-    INDEX idx_operation_log_operator (operator_username, created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- ----------------------------
+-- Records of financial_transaction
+-- ----------------------------
+INSERT INTO `financial_transaction` VALUES (1, 4, 'RES20260312080001', 'CHECKOUT_SETTLEMENT', 1364.00, 'CHARGE', '历史订单退房结算', '2026-07-18 02:20:58');
+INSERT INTO `financial_transaction` VALUES (2, 5, 'RES20260405093002', 'CHECKOUT_SETTLEMENT', 1474.00, 'CHARGE', '历史订单退房结算', '2026-08-22 02:20:58');
+INSERT INTO `financial_transaction` VALUES (3, 6, 'RES20260402101503', 'CHECKOUT_SETTLEMENT', 866.00, 'CHARGE', '历史订单退房结算', '2026-08-16 02:20:58');
+INSERT INTO `financial_transaction` VALUES (4, 7, 'RES20260415113004', 'CHECKOUT_SETTLEMENT', 1524.00, 'CHARGE', '历史订单退房结算', '2026-09-01 02:20:58');
+INSERT INTO `financial_transaction` VALUES (5, 8, 'RES20260320093005', 'CHECKOUT_SETTLEMENT', 3592.00, 'CHARGE', '历史订单退房结算', '2026-08-03 02:20:58');
+INSERT INTO `financial_transaction` VALUES (6, 9, 'RES20260410144506', 'CHECKOUT_SETTLEMENT', 2564.00, 'CHARGE', '历史订单退房结算', '2026-08-27 02:20:58');
+INSERT INTO `financial_transaction` VALUES (8, 1, 'RES20260422080001', 'ROOM_FEE_ADJUSTMENT', 498.00, 'CHARGE', '续住 - 房费调整', '2026-09-14 02:32:15');
+INSERT INTO `financial_transaction` VALUES (9, 1, 'RES20260422080001', 'ROOM_FEE_ADJUSTMENT', 498.00, 'CHARGE', '续住 - 房费调整', '2026-09-14 02:32:27');
 
-CREATE TABLE notification_message (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    category VARCHAR(64) NOT NULL,
-    title VARCHAR(128) NOT NULL,
-    content VARCHAR(255) NOT NULL,
-    related_type VARCHAR(32) NOT NULL,
-    related_id BIGINT NOT NULL,
-    target_role VARCHAR(32) NOT NULL,
-    status VARCHAR(32) NOT NULL DEFAULT 'UNREAD',
-    scheduled_at DATETIME NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    read_at DATETIME NULL,
-    INDEX idx_notification_target (target_role, status, scheduled_at),
-    INDEX idx_notification_related (related_type, related_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- ----------------------------
+-- Table structure for guest
+-- ----------------------------
+DROP TABLE IF EXISTS `guest`;
+CREATE TABLE `guest`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `id_card` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `member_level` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `phone`(`phone` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
-INSERT INTO room_type (name, base_price, max_guests, bed_type, area, description, amenities) VALUES
-('都市大床房', 498.00, 2, '1.8 米大床', 32, '适合商旅出行与城市短住。', '早餐, 无线网络, 智能电视'),
-('花园双床房', 568.00, 2, '2 张 1.2 米单人床', 36, '安静楼层，窗户朝向庭院。', '早餐, 无线网络, 茶具'),
-('行政套房', 968.00, 4, '1.8 米大床 + 沙发', 62, '客厅式布局，适合家庭或贵宾入住。', '早餐, 迷你吧, 浴缸');
+-- ----------------------------
+-- Records of guest
+-- ----------------------------
+INSERT INTO `guest` VALUES (1, '林若川', '13800000001', '330102199110101234', 'GOLD', '习惯晚到，请保留房间');
+INSERT INTO `guest` VALUES (2, '周清禾', '13800000002', '330102199305052456', 'REGULAR', '企业协议客户，按月结算');
+INSERT INTO `guest` VALUES (3, '沈嘉屿', '13800000003', '330102199512128888', 'PLATINUM', '需要机场接送服务');
 
-INSERT INTO room (room_number, room_type_id, floor, status, clean_status) VALUES
-('801', 1, 8, 'AVAILABLE', 'READY'),
-('802', 1, 8, 'AVAILABLE', 'READY'),
-('901', 2, 9, 'AVAILABLE', 'READY'),
-('902', 2, 9, 'OCCUPIED', 'CLEANING'),
-('1001', 3, 10, 'AVAILABLE', 'READY'),
-('1002', 3, 10, 'MAINTENANCE', 'BLOCKED');
+-- ----------------------------
+-- Table structure for notification_message
+-- ----------------------------
+DROP TABLE IF EXISTS `notification_message`;
+CREATE TABLE `notification_message`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `category` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `title` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `related_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `related_id` bigint NOT NULL,
+  `target_role` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `status` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'UNREAD',
+  `scheduled_at` datetime NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `read_at` datetime NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_notification_target`(`target_role` ASC, `status` ASC, `scheduled_at` ASC) USING BTREE,
+  INDEX `idx_notification_related`(`related_type` ASC, `related_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
-INSERT INTO guest (full_name, phone, id_card, member_level, remark) VALUES
-('林若川', '13800000001', '330102199110101234', 'GOLD', '习惯晚到，请保留房间'),
-('周清禾', '13800000002', '330102199305052456', 'REGULAR', '企业协议客户，按月结算'),
-('沈嘉屿', '13800000003', '330102199512128888', 'PLATINUM', '需要机场接送服务');
+-- ----------------------------
+-- Records of notification_message
+-- ----------------------------
+INSERT INTO `notification_message` VALUES (1, 'UPCOMING_CHECKIN', '即将入住提醒', '订单 RES20260422080001 · 林若川 将于 2026-09-14 到店，房间 802 请提前确认。', 'RESERVATION', 1, 'STAFF', 'UNREAD', '2026-09-14 09:00:00', '2026-09-14 00:43:38', NULL);
+INSERT INTO `notification_message` VALUES (2, 'UPCOMING_CHECKOUT', '即将退房提醒', '订单 RES20260421093015 · 周清禾 将于 2026-09-15 离店，请准备退房结算。', 'RESERVATION', 2, 'STAFF', 'UNREAD', '2026-09-15 09:00:00', '2026-09-14 00:43:38', NULL);
 
-INSERT INTO customer_user (username, phone, password, display_name, member_level, status) VALUES
-('13900000001', '13900000001', '$2a$10$VvN31onlQ0j5W1D2Laj0zuzQO2S4M0nB6fTP3D6JrIoYNewc0hXtS', '住客示例', 'REGULAR', 'ACTIVE');
+-- ----------------------------
+-- Table structure for operation_log
+-- ----------------------------
+DROP TABLE IF EXISTS `operation_log`;
+CREATE TABLE `operation_log`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `reservation_id` bigint NULL DEFAULT NULL,
+  `room_id` bigint NULL DEFAULT NULL,
+  `operator_username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `operator_role` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `action_type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `before_snapshot` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `after_snapshot` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `fk_operation_log_room`(`room_id` ASC) USING BTREE,
+  INDEX `idx_operation_log_reservation`(`reservation_id` ASC, `created_at` ASC) USING BTREE,
+  INDEX `idx_operation_log_operator`(`operator_username` ASC, `created_at` ASC) USING BTREE,
+  CONSTRAINT `fk_operation_log_reservation` FOREIGN KEY (`reservation_id`) REFERENCES `reservation` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_operation_log_room` FOREIGN KEY (`room_id`) REFERENCES `room` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
-INSERT INTO reservation (
-    reservation_no, guest_id, room_id, check_in_date, check_out_date, guest_count,
-    room_fee, breakfast_fee, extra_bed_fee, deposit_amount, coupon_amount, total_amount,
-    status, channel, special_request, created_at
-) VALUES
-('RES20260422080001', 1, 2, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 2 DAY), 2, 996.00, 68.00, 0.00, 300.00, 50.00, 1314.00, 'BOOKED', 'DIRECT', '偏好靠窗房间', NOW()),
-('RES20260421093015', 2, 4, DATE_SUB(CURDATE(), INTERVAL 1 DAY), DATE_ADD(CURDATE(), INTERVAL 1 DAY), 2, 1136.00, 88.00, 0.00, 300.00, 0.00, 1524.00, 'CHECKED_IN', 'OTA', '需要额外毛巾', NOW()),
-('RES20260420114530', 3, 5, DATE_ADD(CURDATE(), INTERVAL 3 DAY), DATE_ADD(CURDATE(), INTERVAL 5 DAY), 3, 1936.00, 128.00, 160.00, 500.00, 100.00, 2624.00, 'BOOKED', 'DIRECT', '需要婴儿床', NOW());
+-- ----------------------------
+-- Records of operation_log
+-- ----------------------------
+INSERT INTO `operation_log` VALUES (1, 1, 2, 'admin', 'ADMIN', 'EXTEND_STAY', '续住至 2026-09-17', 'reservationNo=RES20260422080001,status=BOOKED,roomId=2,checkIn=2026-09-14,checkOut=2026-09-16,total=1314.00,operator=admin/ADMIN', 'reservationNo=RES20260422080001,status=BOOKED,roomId=2,checkIn=2026-09-14,checkOut=2026-09-17,total=1812.00,operator=admin/ADMIN', '2026-09-14 02:32:15');
+INSERT INTO `operation_log` VALUES (2, 1, 2, 'admin', 'ADMIN', 'EXTEND_STAY', '续住至 2026-09-18', 'reservationNo=RES20260422080001,status=BOOKED,roomId=2,checkIn=2026-09-14,checkOut=2026-09-17,total=1812.00,operator=admin/ADMIN', 'reservationNo=RES20260422080001,status=BOOKED,roomId=2,checkIn=2026-09-14,checkOut=2026-09-18,total=2310.00,operator=admin/ADMIN', '2026-09-14 02:32:27');
 
--- 历史已退房订单：让住客画像的「完成入住 / 累计消费 / 平均消费」有真实数据
-INSERT INTO reservation (
-    reservation_no, guest_id, room_id, check_in_date, check_out_date, guest_count,
-    room_fee, breakfast_fee, extra_bed_fee, deposit_amount, coupon_amount, total_amount,
-    status, channel, special_request, created_at, actual_check_in_time, actual_check_out_time
-) VALUES
-('RES20260312080001', 1, 1, DATE_SUB(CURDATE(), INTERVAL 60 DAY), DATE_SUB(CURDATE(), INTERVAL 58 DAY), 2,
- 996.00, 68.00, 0.00, 300.00, 0.00, 1364.00, 'CHECKED_OUT', 'DIRECT', '希望安排高楼层安静房间',
- DATE_SUB(NOW(), INTERVAL 62 DAY), DATE_SUB(NOW(), INTERVAL 60 DAY), DATE_SUB(NOW(), INTERVAL 58 DAY)),
-('RES20260405093002', 1, 3, DATE_SUB(CURDATE(), INTERVAL 25 DAY), DATE_SUB(CURDATE(), INTERVAL 23 DAY), 2,
- 1136.00, 88.00, 0.00, 300.00, 50.00, 1474.00, 'CHECKED_OUT', 'OTA', '需要开具增值税发票',
- DATE_SUB(NOW(), INTERVAL 27 DAY), DATE_SUB(NOW(), INTERVAL 25 DAY), DATE_SUB(NOW(), INTERVAL 23 DAY)),
-('RES20260402101503', 2, 1, DATE_SUB(CURDATE(), INTERVAL 30 DAY), DATE_SUB(CURDATE(), INTERVAL 29 DAY), 2,
- 498.00, 68.00, 0.00, 300.00, 0.00, 866.00, 'CHECKED_OUT', 'PHONE', '企业协议价，按月度结算',
- DATE_SUB(NOW(), INTERVAL 31 DAY), DATE_SUB(NOW(), INTERVAL 30 DAY), DATE_SUB(NOW(), INTERVAL 29 DAY)),
-('RES20260415113004', 2, 3, DATE_SUB(CURDATE(), INTERVAL 15 DAY), DATE_SUB(CURDATE(), INTERVAL 13 DAY), 2,
- 1136.00, 88.00, 0.00, 300.00, 0.00, 1524.00, 'CHECKED_OUT', 'DIRECT', '希望延迟退房至 14:00',
- DATE_SUB(NOW(), INTERVAL 16 DAY), DATE_SUB(NOW(), INTERVAL 15 DAY), DATE_SUB(NOW(), INTERVAL 13 DAY)),
-('RES20260320093005', 3, 5, DATE_SUB(CURDATE(), INTERVAL 45 DAY), DATE_SUB(CURDATE(), INTERVAL 42 DAY), 3,
- 2904.00, 128.00, 160.00, 500.00, 100.00, 3592.00, 'CHECKED_OUT', 'DIRECT', '需要婴儿床与接送机服务',
- DATE_SUB(NOW(), INTERVAL 46 DAY), DATE_SUB(NOW(), INTERVAL 45 DAY), DATE_SUB(NOW(), INTERVAL 42 DAY)),
-('RES20260410144506', 3, 5, DATE_SUB(CURDATE(), INTERVAL 20 DAY), DATE_SUB(CURDATE(), INTERVAL 18 DAY), 3,
- 1936.00, 128.00, 0.00, 500.00, 0.00, 2564.00, 'CHECKED_OUT', 'OTA', '家庭同行，需加床',
- DATE_SUB(NOW(), INTERVAL 21 DAY), DATE_SUB(NOW(), INTERVAL 20 DAY), DATE_SUB(NOW(), INTERVAL 18 DAY));
+-- ----------------------------
+-- Table structure for reservation
+-- ----------------------------
+DROP TABLE IF EXISTS `reservation`;
+CREATE TABLE `reservation`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `reservation_no` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `guest_id` bigint NOT NULL,
+  `room_id` bigint NOT NULL,
+  `check_in_date` date NOT NULL,
+  `check_out_date` date NOT NULL,
+  `guest_count` int NOT NULL,
+  `room_fee` decimal(10, 2) NOT NULL DEFAULT 0.00,
+  `breakfast_fee` decimal(10, 2) NOT NULL DEFAULT 0.00,
+  `extra_bed_fee` decimal(10, 2) NOT NULL DEFAULT 0.00,
+  `deposit_amount` decimal(10, 2) NOT NULL DEFAULT 0.00,
+  `coupon_amount` decimal(10, 2) NOT NULL DEFAULT 0.00,
+  `total_amount` decimal(10, 2) NOT NULL,
+  `status` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `channel` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `special_request` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actual_check_in_time` datetime NULL DEFAULT NULL,
+  `actual_check_out_time` datetime NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `reservation_no`(`reservation_no` ASC) USING BTREE,
+  INDEX `fk_reservation_guest`(`guest_id` ASC) USING BTREE,
+  INDEX `idx_reservation_room_dates`(`room_id` ASC, `check_in_date` ASC, `check_out_date` ASC) USING BTREE,
+  INDEX `idx_reservation_status_dates`(`status` ASC, `check_in_date` ASC, `check_out_date` ASC) USING BTREE,
+  CONSTRAINT `fk_reservation_guest` FOREIGN KEY (`guest_id`) REFERENCES `guest` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_reservation_room` FOREIGN KEY (`room_id`) REFERENCES `room` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
--- 退房结算流水：与上面的历史订单对应，保证「财务流水 / 流水概览」统计一致
-INSERT INTO financial_transaction (
-    reservation_id, reservation_no, transaction_type, amount, direction, remark, created_at
-)
-SELECT r.id, r.reservation_no, 'CHECKOUT_SETTLEMENT', r.total_amount, 'CHARGE', '历史订单退房结算', r.actual_check_out_time
-FROM reservation r
-WHERE r.status = 'CHECKED_OUT';
+-- ----------------------------
+-- Records of reservation
+-- ----------------------------
+INSERT INTO `reservation` VALUES (1, 'RES20260422080001', 1, 2, '2026-09-14', '2026-09-18', 2, 1992.00, 68.00, 0.00, 300.00, 50.00, 2310.00, 'BOOKED', 'DIRECT', '偏好靠窗房间', '2026-09-14 00:31:44', NULL, NULL);
+INSERT INTO `reservation` VALUES (2, 'RES20260421093015', 2, 4, '2026-09-13', '2026-09-15', 2, 1136.00, 88.00, 0.00, 300.00, 0.00, 1524.00, 'CHECKED_IN', 'OTA', '需要额外毛巾', '2026-09-14 00:31:44', NULL, NULL);
+INSERT INTO `reservation` VALUES (3, 'RES20260420114530', 3, 5, '2026-09-17', '2026-09-19', 3, 1936.00, 128.00, 160.00, 500.00, 100.00, 2624.00, 'BOOKED', 'DIRECT', '需要婴儿床', '2026-09-14 00:31:44', NULL, NULL);
+INSERT INTO `reservation` VALUES (4, 'RES20260312080001', 1, 1, '2026-07-16', '2026-07-18', 2, 996.00, 68.00, 0.00, 300.00, 0.00, 1364.00, 'CHECKED_OUT', 'DIRECT', '希望安排高楼层安静房间', '2026-07-14 02:20:58', '2026-07-16 02:20:58', '2026-07-18 02:20:58');
+INSERT INTO `reservation` VALUES (5, 'RES20260405093002', 1, 3, '2026-08-20', '2026-08-22', 2, 1136.00, 88.00, 0.00, 300.00, 50.00, 1474.00, 'CHECKED_OUT', 'OTA', '需要开具增值税发票', '2026-08-18 02:20:58', '2026-08-20 02:20:58', '2026-08-22 02:20:58');
+INSERT INTO `reservation` VALUES (6, 'RES20260402101503', 2, 1, '2026-08-15', '2026-08-16', 2, 498.00, 68.00, 0.00, 300.00, 0.00, 866.00, 'CHECKED_OUT', 'PHONE', '企业协议价，按月度结算', '2026-08-14 02:20:58', '2026-08-15 02:20:58', '2026-08-16 02:20:58');
+INSERT INTO `reservation` VALUES (7, 'RES20260415113004', 2, 3, '2026-08-30', '2026-09-01', 2, 1136.00, 88.00, 0.00, 300.00, 0.00, 1524.00, 'CHECKED_OUT', 'DIRECT', '希望延迟退房至 14:00', '2026-08-29 02:20:58', '2026-08-30 02:20:58', '2026-09-01 02:20:58');
+INSERT INTO `reservation` VALUES (8, 'RES20260320093005', 3, 5, '2026-07-31', '2026-08-03', 3, 2904.00, 128.00, 160.00, 500.00, 100.00, 3592.00, 'CHECKED_OUT', 'DIRECT', '需要婴儿床与接送机服务', '2026-07-30 02:20:58', '2026-07-31 02:20:58', '2026-08-03 02:20:58');
+INSERT INTO `reservation` VALUES (9, 'RES20260410144506', 3, 5, '2026-08-25', '2026-08-27', 3, 1936.00, 128.00, 0.00, 500.00, 0.00, 2564.00, 'CHECKED_OUT', 'OTA', '家庭同行，需加床', '2026-08-24 02:20:58', '2026-08-25 02:20:58', '2026-08-27 02:20:58');
+
+-- ----------------------------
+-- Table structure for room
+-- ----------------------------
+DROP TABLE IF EXISTS `room`;
+CREATE TABLE `room`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `room_number` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `room_type_id` bigint NOT NULL,
+  `floor` int NOT NULL,
+  `status` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `clean_status` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `room_number`(`room_number` ASC) USING BTREE,
+  INDEX `fk_room_room_type`(`room_type_id` ASC) USING BTREE,
+  CONSTRAINT `fk_room_room_type` FOREIGN KEY (`room_type_id`) REFERENCES `room_type` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of room
+-- ----------------------------
+INSERT INTO `room` VALUES (1, '801', 1, 8, 'AVAILABLE', 'READY');
+INSERT INTO `room` VALUES (2, '802', 1, 8, 'AVAILABLE', 'READY');
+INSERT INTO `room` VALUES (3, '901', 2, 9, 'AVAILABLE', 'READY');
+INSERT INTO `room` VALUES (4, '902', 2, 9, 'OCCUPIED', 'CLEANING');
+INSERT INTO `room` VALUES (5, '1001', 3, 10, 'AVAILABLE', 'READY');
+INSERT INTO `room` VALUES (6, '1002', 3, 10, 'MAINTENANCE', 'BLOCKED');
+
+-- ----------------------------
+-- Table structure for room_type
+-- ----------------------------
+DROP TABLE IF EXISTS `room_type`;
+CREATE TABLE `room_type`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `base_price` decimal(10, 2) NOT NULL,
+  `max_guests` int NOT NULL,
+  `bed_type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `area` int NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `amenities` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of room_type
+-- ----------------------------
+INSERT INTO `room_type` VALUES (1, '都市大床房', 498.00, 2, '1.8 米大床', 32, '适合商旅出行与城市短住。', '早餐, 无线网络, 智能电视');
+INSERT INTO `room_type` VALUES (2, '花园双床房', 568.00, 2, '2 张 1.2 米单人床', 36, '安静楼层，窗户朝向庭院。', '早餐, 无线网络, 茶具');
+INSERT INTO `room_type` VALUES (3, '行政套房', 968.00, 4, '1.8 米大床 + 沙发', 62, '客厅式布局，适合家庭或贵宾入住。', '早餐, 迷你吧, 浴缸');
+
+SET FOREIGN_KEY_CHECKS = 1;
