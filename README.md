@@ -5,7 +5,7 @@
 ## 项目亮点
 
 - 三端角色协同：管理员、前台专员、住客端统一接入同一套平台能力
-- 完整酒店业务链路：房型、房间、住客、预订、入住、离店、结算、报表
+- 完整酒店业务链路：房型与房间基础数据、住客、预订、入住、离店、结算、报表
 - 正式化权限控制：基于 Spring Security 与 JWT 的角色访问控制
 - 订单状态流转：支持 `BOOKED / CHECKED_IN / CHECKED_OUT / CANCELLED`
 - 自动计价能力：按房型单价与入住晚数自动计算订单金额
@@ -54,8 +54,6 @@
 - 仪表盘概览
 - 营收趋势分析
 - Excel 报表导出
-- 房型管理 CRUD
-- 房间管理 CRUD
 - 订单管理 CRUD
 - 订单分页、筛选、搜索
 - 订单状态流转
@@ -105,7 +103,7 @@
 .
 ├── backend                     # Spring Boot 接口服务
 ├── frontend                    # Vue 3 + Vite 前端
-└── database                    # MySQL 初始化脚本与增量脚本
+└── database                    # MySQL 初始化脚本
 ```
 
 ## 业务角色说明
@@ -113,8 +111,9 @@
 ### 管理员 `ADMIN`
 
 - 查看运营总览与趋势分析
-- 管理房型、房间、订单、住客
+- 管理订单、住客
 - 导出 Excel 报表
+- 查看房型与房间基础数据
 - 管理后台账号、角色与权限范围
 
 ### 前台专员 `FRONT_DESK`
@@ -165,7 +164,7 @@ npm install
 npm run dev
 ```
 
-默认地址：`http://localhost:5174`
+默认地址：`http://localhost:5173`
 
 ## 默认测试账号
 
@@ -210,19 +209,6 @@ npm run dev
 - `GET /api/v1/operations/notifications`
 - `PUT /api/v1/operations/notifications/{id}/read`
 
-### 房型与房间
-
-- `GET /api/v1/room-types`
-- `GET /api/v1/room-types/page`
-- `POST /api/v1/room-types`
-- `PUT /api/v1/room-types/{id}`
-- `DELETE /api/v1/room-types/{id}`
-- `GET /api/v1/rooms`
-- `GET /api/v1/rooms/page`
-- `GET /api/v1/rooms/available`
-- `POST /api/v1/rooms`
-- `PUT /api/v1/rooms/{id}`
-- `DELETE /api/v1/rooms/{id}`
 
 ### 订单与住客
 
