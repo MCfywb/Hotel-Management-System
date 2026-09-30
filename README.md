@@ -1,3 +1,5 @@
+<p align="center"><b>简体中文</b> | <a href="./README.en.md">English</a></p>
+
 # 酒店管理平台
 
 一个面向酒店日常运营场景的前后端分离项目，覆盖后台管理、前台接待与住客端自助预订三类角色。项目基于 `Spring Boot 3 + Spring Security + MyBatis-Plus + MySQL + Vue 3 + Vite` 构建，提供完整接口、权限模型、业务流转与极简风格前端界面，适合作为课程设计、毕业设计、全栈练手项目或中小型酒店业务原型。
